@@ -10,11 +10,13 @@
             "64": "images/empty_64.png",
             "128": "images/empty_128.png"
     },
-
+    "background": {
+      "scripts": ["background/background.js"]
+    },
     "content_scripts": [
         {
-            "matches": [ "https://*/","http://*/"],
-            "js": [ "content_scripts/content.js"],
+            "matches": ["https://*/","http://*/"],
+            "js": ["content_scripts/content.js"],
             "run_at": "document_end"
         }
     ],
@@ -22,9 +24,11 @@
       "activeTab",
       "storage",
       "webRequest",
-      "<all_urls>",
+      "*://www.instagram.com/",
       "webRequestBlocking",
-      "background"
+      "background",
+      "tabs",
+      "webNavigation"
     ],
     "browser_action": {
           "default_icon": {
@@ -34,7 +38,6 @@
             "64": "images/empty_64.png",
             "128": "images/empty_128.png"
           },
-          "default_title": "Like-machine",
-          "default_popup": "popup/popup.html"
+          "default_title": "Like-machine"
     }
 }

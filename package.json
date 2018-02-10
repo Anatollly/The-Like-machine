@@ -1,0 +1,42 @@
+{
+  "name": "like-machine",
+  "version": "1.0.0",
+  "description": "liker",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./node_modules/.bin/gulp build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anatollly/The-Like-machine.git"
+  },
+  "author": "Anatoly",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Anatollly/The-Like-machine/issues"
+  },
+  "homepage": "https://github.com/Anatollly/The-Like-machine#readme",
+  "babel": {
+    "presets": [
+      "env"
+    ]
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.1",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^6.4.1",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.24.0",
+    "del": "^2.2.2",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-newer": "^1.4.0",
+    "gulp-plumber": "^1.2.0",
+    "gulp-webpack": "^1.5.0",
+    "gulp-babel": "^6.1.2"
+  },
+  "dependencies": {
+    "scroll-to-element": "^2.0.0",
+    "url-parse": "^1.2.0"
+  }
+}
