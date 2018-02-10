@@ -51,7 +51,7 @@ class ElementData {
     try {
       return this.userElement.innerHTML;
     } catch (e) {
-      console.log('No name');
+      // console.log('No name');
     }
   }
 
@@ -68,7 +68,7 @@ class ElementData {
     try {
       return this.locationElement.innerHTML;
     } catch (e) {
-      console.log('No location');
+      // console.log('No location');
     }
   }
 
@@ -76,7 +76,7 @@ class ElementData {
     try {
       return this.locationElement.href;
     } catch (e) {
-      console.log('No location link');
+      // console.log('No location link');
     }
   }
 
@@ -112,7 +112,8 @@ class ElementData {
   }
 
   get postLink() {
-    return parse(this.timeElement.href, true).pathname || null;
+    const timeElement = this.timeElement;
+    return timeElement && parse(this.timeElement.href, true).pathname || null;
   }
 
   get dateCreate() {

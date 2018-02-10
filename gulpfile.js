@@ -85,6 +85,7 @@ gulp.task('watch', function() {
   gulp.watch('popup/*.js', gulp.series('popup_scripts'));
   gulp.watch('popup/*.html', gulp.series('html'));
   gulp.watch('images/**/*.*', gulp.series('images'));
+  gulp.watch('manifest.json', gulp.series('manifest'));
 });
 
 gulp.task('build',

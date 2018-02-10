@@ -21,19 +21,23 @@ window.onload = () => {
 
   const controller = switchController(machineData);
   const lmControllerView = new LmControllerView(controller);
+  controller.onSwitchHavey();
+  lmControllerView.addElement();
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const {
       firstLoad, click, url, maxLikes, machineSwitch
     } = message;
-    const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/)[1];
-    console.log('href: ', href);
-    switch (href) {
+    const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/);
+    const postName = href[0];
+    const path = href[1];
+    console.log('postName: ', postName);
+    switch (path) {
       case '':
         controller.onSwitchHavey();
         break;
       case 'p':
-        controller.onSwitchExplorer();
+        controller.onSwitchExplorer(postName);
         break;
       case 'explore':
         controller.onSwitchExplorer();
@@ -41,7 +45,7 @@ window.onload = () => {
       default:
         controller.onSwitchOff();
     }
-    lmControllerView.addElement();
+    // lmControllerView.addElement();
     machineSwitch ? lmControllerView.showElement() : lmControllerView.hiddenElement();
   });
   chrome.runtime.sendMessage({ status: 'onload' });

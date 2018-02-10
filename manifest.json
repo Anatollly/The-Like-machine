@@ -15,7 +15,7 @@
     },
     "content_scripts": [
         {
-            "matches": ["https://*/","http://*/"],
+            "matches": ["https://www.instagram.com/*","http://www.instagram.com/*"],
             "js": ["content_scripts/content.js"],
             "run_at": "document_end"
         }
@@ -24,7 +24,7 @@
       "activeTab",
       "storage",
       "webRequest",
-      "*://www.instagram.com/",
+      "*://www.instagram.com/*",
       "webRequestBlocking",
       "background",
       "tabs",

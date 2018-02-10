@@ -173,15 +173,6 @@ export default class HaveyController {
     }, 50)
   }
 
-  // scrollToUnlikeElement(callback) {
-  //   const element = this.currentNodes.element;
-  //   if (elementData(element).heartFull) { // like
-  //     this.scrollToElement(this.nextNodes.element, this.scrollToUnlikeElement);
-  //   } else {
-  //     this.scrollToElement(element, this.likeCurrentElemen);
-  //   }
-  // }
-
   likeElement(elementNodes) {
     const image = elementNodes.dblclickImageElement;
     const heart = elementNodes.heartElement;
@@ -214,7 +205,6 @@ export default class HaveyController {
     this.scrollTimerID = setInterval(() => {
       const { maxLikes, likeNowCounter } = this.model.state;
       likeNowCounter < maxLikes ? this.likeNextElement() : this.stopLM();
-      // likeNowCounter < maxLikes ? this.scrollToUnlikeElement() : this.stopLM();
     }, 1000);
   }
 

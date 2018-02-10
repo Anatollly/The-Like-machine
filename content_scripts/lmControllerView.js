@@ -79,12 +79,14 @@ export default class LmControllerView {
 
   bindHandlers() {
     const { element, haveyLikeFunc } = this;
+    console.log('element: ', element);
     const maxLikes = element.querySelector('#lm--maxLikes');
     maxLikes.value = this.controller.model.state.maxLikes;
     maxLikes.addEventListener('input', () => {
       this.controller.model.maxLikes = maxLikes.value * 1;
     });
     element.querySelector('#lm--start').addEventListener('click', () => {
+      console.log('this.controller: ', this.controller);
       this.controller.startLM();
     });
     element.querySelector('#lm--pause').addEventListener('click', () => {
