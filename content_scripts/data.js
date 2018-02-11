@@ -65,6 +65,7 @@ export const setCurrentHaveyElementNum = (data, num) => {
 };
 
 export const setMaxLikes = (data, num) => {
+  console.log('num: ', num);
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof num !== 'number') throw new Error('Invalid data type. Arguments: "num"');
   if (num < 0) throw new Error('Element number can not be less than zero. Number: ' + num);

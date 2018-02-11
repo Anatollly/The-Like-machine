@@ -10,6 +10,11 @@ class ElementData {
     this._timeElement = null;
   }
 
+  get profile() {
+    this._profileElement = document.querySelector('.coreSpriteDesktopNavProfile');
+    return this._profileElement && this._profileElement.href;
+  }
+
   get heartElement() {
     return (
       this.element.querySelector('.coreSpriteHeartOpen')
@@ -99,7 +104,11 @@ class ElementData {
   }
 
   get description() {
-    return this.imageElement.alt || '';
+    return this.imageElement.alt;
+  }
+
+  get imageSrc() {
+    return this.imageElement.src;
   }
 
   get dblclickImageElement() {
@@ -143,7 +152,8 @@ class ElementData {
       saveFull,
       postLink,
       dateCreate,
-      dateView
+      dateView,
+      imageSrc
     } = this;
 
     return {
@@ -156,7 +166,8 @@ class ElementData {
       saveFull,
       postLink,
       dateCreate,
-      dateView
+      dateView,
+      imageSrc
     };
   }
 
@@ -169,7 +180,8 @@ class ElementData {
       textareaElement,
       imageElement,
       wrapImgElement,
-      dblclickImageElement
+      dblclickImageElement,
+      imageSrc
     } = this;
 
     return {
@@ -180,7 +192,8 @@ class ElementData {
       textareaElement,
       imageElement,
       wrapImgElement,
-      dblclickImageElement
+      dblclickImageElement,
+      imageSrc
     };
   }
 

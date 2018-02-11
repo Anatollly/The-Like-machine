@@ -301,7 +301,6 @@ export default class HaveyController {
   }
 
   collectDataStart() {
-    this.model.setInitState();
     this.numberingElements(() => {
       this.addListInsertElement();
       this.addListRemoveElement();

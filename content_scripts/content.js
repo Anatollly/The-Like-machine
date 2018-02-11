@@ -3,8 +3,7 @@ import LmControllerView from './lmControllerView';
 import SwitchController from './switchController';
 
 const machineData = {
-  maxLikes: 101,
-  machineSwitch: false,
+  // maxLikes: 100,
   counter: {
     likeTotal: 0,
     likeToday: 0,
@@ -49,6 +48,7 @@ const handClick = (click, controller) => {
 };
 
 const handMaxLikes = (maxLikes, model) => {
+  console.log('maxLikes: ', maxLikes);
   model.maxLikes = maxLikes;
 };
 
@@ -59,11 +59,12 @@ window.onload = () => {
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('message: ', message);
-    const { onload, click, url, maxLikes, machineSwitch } = message;
+    const { onload, click, url, maxLikes, machineSwitch, state } = message;
 
     if (url) handUrl(url, controller);
     if (click) handClick(click, controller.controller);
     if (maxLikes) handMaxLikes(maxLikes, controller.model);
+    if (state) chrome.runtime.sendMessage({ state: controller.model.state });
 
     lmControllerView.addElement();
     machineSwitch ? lmControllerView.showElement() : lmControllerView.hiddenElement();
