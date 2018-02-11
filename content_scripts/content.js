@@ -1,6 +1,6 @@
 import parse from 'url-parse';
 import LmControllerView from './lmControllerView';
-import switchController from './switchController';
+import SwitchController from './switchController';
 // import haveyController from './haveyController';
 // import explorerController from './explorerController';
 
@@ -15,11 +15,9 @@ const machineData = {
   }
 };
 
-
 window.onload = () => {
   window.scrollTo(0, 0);
-
-  const controller = switchController(machineData);
+  const controller = new SwitchController(machineData);
   const lmControllerView = new LmControllerView(controller);
   controller.onSwitchHavey();
   lmControllerView.addElement();

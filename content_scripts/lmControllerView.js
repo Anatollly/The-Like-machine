@@ -72,27 +72,28 @@ export default class LmControllerView {
         right: 50px;
         bottom: 50px;
         z-index: 1000000;
-        background-color: rgba(100, 100, 100, 0.3);
+        background-color: red;
     }
     `;
   }
 
   bindHandlers() {
-    const { element, haveyLikeFunc } = this;
-    console.log('element: ', element);
+    const { element,  } = this;
+    console.log('bindHandlers element: ', element);
     const maxLikes = element.querySelector('#lm--maxLikes');
     maxLikes.value = this.controller.model.state.maxLikes;
     maxLikes.addEventListener('input', () => {
       this.controller.model.maxLikes = maxLikes.value * 1;
     });
-    element.querySelector('#lm--start').addEventListener('click', () => {
+    element.onclick = () => {console.log('lm element click');};
+    this._element.querySelector('#lm--start').addEventListener('click', () => {
       console.log('this.controller: ', this.controller);
       this.controller.startLM();
     });
-    element.querySelector('#lm--pause').addEventListener('click', () => {
+    this._element.querySelector('#lm--pause').addEventListener('click', () => {
       this.controller.pauseLM();
     });
-    element.querySelector('#lm--stop').addEventListener('click', () => {
+    this._element.querySelector('#lm--stop').addEventListener('click', () => {
       this.controller.stopLM();
     });
     this._totalElement = element.querySelector('.lm--count-total .lm--count-num');
@@ -126,6 +127,7 @@ export default class LmControllerView {
   }
 
   showElement() {
+    console.log('this.controller: ', this._element);
     this.element.removeAttribute('hidden');
   }
 
