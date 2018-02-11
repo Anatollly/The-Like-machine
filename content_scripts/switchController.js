@@ -2,7 +2,7 @@ import HaveyController from './haveyController';
 import ExplorerController from './explorerController';
 import Model from './model';
 
-class SwitchController {
+export default class SwitchController {
   constructor(data) {
     this.data = data;
     this.model = new Model(this.data);
@@ -19,6 +19,7 @@ class SwitchController {
   }
 
   onSwitchExplorer(postName) {
+    console.log('onSwitchExplorer postName: ', postName);
     if (this._controller !== this.explorerController) this.switchToExplorerController();
     postName && this.explorerController.openPost(postName);
   }
@@ -49,4 +50,4 @@ class SwitchController {
   }
 }
 
-export default (data) => new SwitchController(data);
+// export default (data) => new SwitchController(data);

@@ -38,6 +38,7 @@
             "64": "images/empty_64.png",
             "128": "images/empty_128.png"
           },
-          "default_title": "Like-machine"
+          "default_title": "Like-machine",
+          "default_popup": "popup/popup.html"
     }
 }

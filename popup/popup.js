@@ -1,7 +1,14 @@
-let maxLikes = 60;
+let data = {
+  click: '',
+  url: '',
+  maxLikes: 0
+};
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('onMessage: ', message, sender, sendResponse);
+});
 
 chrome.browserAction.onClicked.addListener((tab) => {
-  console.log('click icon');
   chrome.tabs.query({active: true, currentWindow: true}, tabs => {
     chrome.tabs.sendMessage(tabs[0].id, {click: "icon", url: tabs[0].url}, () => {
       console.log('click icon');
@@ -9,48 +16,30 @@ chrome.browserAction.onClicked.addListener((tab) => {
   });
 });
 
-// window.onload = () => {
-//
-//   const maxLikesInput = document.querySelector('#max-likes');
-//   const start = document.querySelector('#start');
-//   const pause = document.querySelector('#pause');
-//   const stop = document.querySelector('#stop');
-//
-//   maxLikesInput.value = maxLikes;
-//
-//   maxLikesInput.addEventListener('input', () => {
-//     maxLikes = maxLikesInput.value;
-//   });
-//
-//   start.addEventListener('click', () => {
-//     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-//       chrome.tabs.sendMessage(
-//         tabs[0].id,
-//         {
-//           click: "start",
-//           url: tabs[0].url,
-//           maxLikes: maxLikesInput.value
-//         },
-//         () => {
-//         console.log('like start');
-//       });
-//     });
-//   });
-//
-//   pause.addEventListener('click', () => {
-//     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-//       chrome.tabs.sendMessage(tabs[0].id, {click: "pause", url: tabs[0].url}, () => {
-//         console.log('like pause');
-//       });
-//     });
-//   });
-//
-//   stop.addEventListener('click', () => {
-//     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-//       chrome.tabs.sendMessage(tabs[0].id, {click: "stop", url: tabs[0].url}, () => {
-//         console.log('like stop');
-//       });
-//     });
-//   });
-//
-// };
+window.onload = () => {
+
+  const maxLikesInput = document.querySelector('#max-likes');
+  const form = document.querySelector('form');
+  const start = document.querySelector('#start');
+  const pause = document.querySelector('#pause');
+  const stop = document.querySelector('#stop');
+
+  const sendMessageToContent = (data) => {
+    chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+      // data.url = tabs[0].url;
+      chrome.tabs.sendMessage(tabs[0].id, data);
+    });
+  }
+
+  form.addEventListener('click', (e) => {
+    if (e.target === start) data.click = 'start';
+    if (e.target === pause) data.click = 'pause';
+    if (e.target === stop) data.click = 'stop';
+    sendMessageToContent(data);
+  })
+
+  maxLikesInput.addEventListener('input', (e) => {
+    data.maxLikes = maxLikesInput.value;
+    sendMessageToContent(data);
+  });
+};

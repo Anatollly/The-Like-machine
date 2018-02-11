@@ -10,18 +10,18 @@ export default class ExplorerController {
     return this._wrapElement;
   }
 
-  get element() {
+  get articleElement() {
     return this._wrapElement && this._wrapElement.querySelector('article');
   }
 
   get elementNodes() {
-    return elementData(this.element).elementNodes;
+    return elementData(this.articleElement).elementNodes;
   }
 
   openPost(postName) {
     this.openPostTimerID = setInterval(() => {
       console.log('interval');
-      if (this.wrapElement && elementData(this.element).postLink === postName) {
+      if (this.wrapElement && elementData(this.articleElement).postLink === postName) {
         clearInterval(this.openPostTimerID);
         this.currentNodes = this.elementNodes;
         this.rightArrow = elementData(this.currentNodes.element).rightArrow;

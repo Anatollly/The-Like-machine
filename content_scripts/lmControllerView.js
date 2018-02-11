@@ -47,20 +47,21 @@ export default class LmControllerView {
           <div class="lm--count-heart"></div>
         </div>
       </div>
-      <form class="lm--form">
-        <label for="lm--maxLikes">Maximum likes</label>
-        <input type="text" id="lm--maxLikes">
-        </br>
-        <label for="lm--start">Start</label>
-        <input type="button" id="lm--start">
-        </br>
-        <label for="lm--pause">Pause</label>
-        <input type="button" id="lm--pause">
-        </br>
-        <label for="lm--stop">Stop</label>
-        <input type="button" id="lm--stop">
-      </form>
-    `;
+      `;
+    //   <form class="lm--form">
+    //     <label for="lm--maxLikes">Maximum likes</label>
+    //     <input type="text" id="lm--maxLikes">
+    //     </br>
+    //     <label for="lm--start">Start</label>
+    //     <input type="button" id="lm--start">
+    //     </br>
+    //     <label for="lm--pause">Pause</label>
+    //     <input type="button" id="lm--pause">
+    //     </br>
+    //     <label for="lm--stop">Stop</label>
+    //     <input type="button" id="lm--stop">
+    //   </form>
+    // `;
   }
 
   getStyle() {
@@ -72,29 +73,29 @@ export default class LmControllerView {
         right: 50px;
         bottom: 50px;
         z-index: 1000000;
-        background-color: rgba(100, 100, 100, 0.3);
+        background-color: rgba(100, 100, 100, 0.2);
     }
     `;
   }
 
   bindHandlers() {
-    const { element, haveyLikeFunc } = this;
-    console.log('element: ', element);
-    const maxLikes = element.querySelector('#lm--maxLikes');
-    maxLikes.value = this.controller.model.state.maxLikes;
-    maxLikes.addEventListener('input', () => {
-      this.controller.model.maxLikes = maxLikes.value * 1;
-    });
-    element.querySelector('#lm--start').addEventListener('click', () => {
-      console.log('this.controller: ', this.controller);
-      this.controller.startLM();
-    });
-    element.querySelector('#lm--pause').addEventListener('click', () => {
-      this.controller.pauseLM();
-    });
-    element.querySelector('#lm--stop').addEventListener('click', () => {
-      this.controller.stopLM();
-    });
+    const { element } = this;
+    // const maxLikes = element.querySelector('#lm--maxLikes');
+    // maxLikes.value = this.controller.model.state.maxLikes;
+    // maxLikes.addEventListener('input', () => {
+    //   this.controller.model.maxLikes = maxLikes.value * 1;
+    // });
+    // element.onclick = () => {console.log('lm element click');};
+    // this._element.querySelector('#lm--start').addEventListener('click', () => {
+    //   console.log('this.controller: ', this.controller);
+    //   this.controller.startLM();
+    // });
+    // this._element.querySelector('#lm--pause').addEventListener('click', () => {
+    //   this.controller.pauseLM();
+    // });
+    // this._element.querySelector('#lm--stop').addEventListener('click', () => {
+    //   this.controller.stopLM();
+    // });
     this._totalElement = element.querySelector('.lm--count-total .lm--count-num');
     this._todayElement = element.querySelector('.lm--count-today .lm--count-num');
     this._nowElement = element.querySelector('.lm--count-now .lm--count-num');
