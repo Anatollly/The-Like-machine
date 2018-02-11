@@ -11,7 +11,6 @@ export default class SwitchController {
   }
 
   get controller() {
-    console.log('switchController controller: ', this._controller);
     return this._controller;
   }
 

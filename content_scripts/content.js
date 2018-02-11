@@ -1,8 +1,6 @@
 import parse from 'url-parse';
 import LmControllerView from './lmControllerView';
 import SwitchController from './switchController';
-// import haveyController from './haveyController';
-// import explorerController from './explorerController';
 
 const machineData = {
   maxLikes: 101,
@@ -15,35 +13,59 @@ const machineData = {
   }
 };
 
+const handUrl = (url, controller) => {
+  const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/);
+  const postName = href[0];
+  const path = href[1];
+  switch (path) {
+    case '':
+      controller.onSwitchHavey();
+      break;
+    case 'p':
+      controller.onSwitchExplorer(postName);
+      break;
+    case 'explore':
+      controller.onSwitchExplorer();
+      break;
+    default:
+      controller.onSwitchOff();
+  }
+};
+
+const handClick = (click, controller) => {
+  switch (click) {
+    case 'start':
+      controller.startLM();
+      break;
+    case 'pause':
+      controller.pauseLM();
+      break;
+    case 'stop':
+      controller.stopLM();
+      break;
+    default:
+      console.log('click: ', click);
+  }
+};
+
+const handMaxLikes = (maxLikes, model) => {
+  model.maxLikes = maxLikes;
+};
+
 window.onload = () => {
   window.scrollTo(0, 0);
   const controller = new SwitchController(machineData);
   const lmControllerView = new LmControllerView(controller);
-  controller.onSwitchHavey();
-  lmControllerView.addElement();
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    const {
-      firstLoad, click, url, maxLikes, machineSwitch
-    } = message;
-    const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/);
-    const postName = href[0];
-    const path = href[1];
-    console.log('postName: ', postName);
-    switch (path) {
-      case '':
-        controller.onSwitchHavey();
-        break;
-      case 'p':
-        controller.onSwitchExplorer(postName);
-        break;
-      case 'explore':
-        controller.onSwitchExplorer();
-        break;
-      default:
-        controller.onSwitchOff();
-    }
-    // lmControllerView.addElement();
+    console.log('message: ', message);
+    const { onload, click, url, maxLikes, machineSwitch } = message;
+
+    if (url) handUrl(url, controller);
+    if (click) handClick(click, controller.controller);
+    if (maxLikes) handMaxLikes(maxLikes, controller.model);
+
+    lmControllerView.addElement();
     machineSwitch ? lmControllerView.showElement() : lmControllerView.hiddenElement();
   });
   chrome.runtime.sendMessage({ status: 'onload' });
