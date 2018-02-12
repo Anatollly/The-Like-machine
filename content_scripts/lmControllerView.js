@@ -3,12 +3,13 @@ export default class LmControllerView {
     this.head = document.querySelector('head');
     this.style = document.createElement('style');
     this.body = document.querySelector('body');
-    this.switchController = controller;
+    // this.switchController = controller;
+    this.model = controller.model;
   }
 
-  get controller() {
-    return this.switchController.controller;
-  }
+  // get controller() {
+  //   return this.switchController.controller;
+  // }
 
   get element() {
     if (!this._element) {
@@ -28,40 +29,25 @@ export default class LmControllerView {
 
 
   getMarkup() {
-    const { likeNowCounter, counter: { likeTotal, likeToday } } = this.controller.model.state;
     return `
       <div class="lm--count">
         <div class="lm--count-item lm--count-total">
           <p class="lm--count-name">Total:</p>
-          <div class="lm--count-num">${likeTotal}</div>
+          <div class="lm--count-num"></div>
           <div class="lm--count-heart"></div>
         </div>
         <div class="lm--count-item lm--count-today">
           <p class="lm--count-name">Today:</p>
-          <div class="lm--count-num">${likeToday}</div>
+          <div class="lm--count-num"></div>
           <div class="lm--count-heart"></div>
         </div>
         <div class="lm--count-item lm--count-now">
           <p class="lm--count-name">Now:</p>
-          <div class="lm--count-num">${likeNowCounter}</div>
+          <div class="lm--count-num"></div>
           <div class="lm--count-heart"></div>
         </div>
       </div>
       `;
-    //   <form class="lm--form">
-    //     <label for="lm--maxLikes">Maximum likes</label>
-    //     <input type="text" id="lm--maxLikes">
-    //     </br>
-    //     <label for="lm--start">Start</label>
-    //     <input type="button" id="lm--start">
-    //     </br>
-    //     <label for="lm--pause">Pause</label>
-    //     <input type="button" id="lm--pause">
-    //     </br>
-    //     <label for="lm--stop">Stop</label>
-    //     <input type="button" id="lm--stop">
-    //   </form>
-    // `;
   }
 
   getStyle() {
@@ -80,28 +66,13 @@ export default class LmControllerView {
 
   bindHandlers() {
     const { element } = this;
-    // const maxLikes = element.querySelector('#lm--maxLikes');
-    // maxLikes.value = this.controller.model.state.maxLikes;
-    // maxLikes.addEventListener('input', () => {
-    //   this.controller.model.maxLikes = maxLikes.value * 1;
-    // });
-    // element.onclick = () => {console.log('lm element click');};
-    // this._element.querySelector('#lm--start').addEventListener('click', () => {
-    //   console.log('this.controller: ', this.controller);
-    //   this.controller.startLM();
-    // });
-    // this._element.querySelector('#lm--pause').addEventListener('click', () => {
-    //   this.controller.pauseLM();
-    // });
-    // this._element.querySelector('#lm--stop').addEventListener('click', () => {
-    //   this.controller.stopLM();
-    // });
     this._totalElement = element.querySelector('.lm--count-total .lm--count-num');
     this._todayElement = element.querySelector('.lm--count-today .lm--count-num');
     this._nowElement = element.querySelector('.lm--count-now .lm--count-num');
-    this.controller.model.onLikeTotal = this.setTotalLikes.bind(this);
-    this.controller.model.onLikeToday = this.setTodayLikes.bind(this);
-    this.controller.model.onLikeNow = this.setNowLikes.bind(this);
+    this.model.onLikeTotal = this.setTotalLikes.bind(this);
+    this.model.onLikeToday = this.setTodayLikes.bind(this);
+    this.model.onLikeNow = this.setNowLikes.bind(this);
+    this.model.onViewElementSwitch = this.setViewElementSwitch.bind(this);
   }
 
   setTotalLikes(num) {
@@ -116,13 +87,17 @@ export default class LmControllerView {
     this._nowElement.innerHTML = num;
   }
 
+  setViewElementSwitch(bool) {
+    console.log('bool: ', bool);
+    bool ? this.showElement() : this.hiddenElement();
+  }
+
   addElement() {
-    const { machineSwitch, head, style, body, element, haveyLikeFunc } = this;
+    const { head, style, body, element } = this;
     style.type = 'text/css';
     style.innerHTML = this.getStyle();
     head.appendChild(style);
     element.classList.add('lm--element');
-    machineSwitch ? this.showElement() : this.hiddenElement();
     body.appendChild(element);
   }
 

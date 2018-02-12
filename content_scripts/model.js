@@ -1,19 +1,42 @@
 import elementData from './elementData';
 
 import {
+  // addElementData,
+  // delElementData,
+  // setElementItemData,
+  // pushElementCoordinates,
+  // addElementNodes,
+  // delElementNodes,
+  // setCurrentHaveyElementNum,
+  // setMaxLikes,
+  // setLikeNowCounter,
+  // setViewElementSwitch,
+  // setItemCounter,
+  // setCounter,
+  // initialState,
+  // setLargestElementNumber
+  initialState,
+  setProfileData,
+  setItemCounter,
+  setCounter,
+  setMaxLikes,
+  setViewElementSwitch,
+  setScrollSpeed,
+  setScrollType,
+  setLikeDelay,
+  setScrollToUnlike,
+  setDblclickInterval,
+  setCurrentPhotoColor,
+  setViewElementColor,
+  setViewElementPosition,
+  setZoomPage,
   addElementData,
   delElementData,
   setElementItemData,
-  pushElementCoordinates,
   addElementNodes,
   delElementNodes,
   setCurrentHaveyElementNum,
-  setMaxLikes,
   setLikeNowCounter,
-  setItemCounter,
-  setCounter,
-  initialState,
-  setLargestElementNumber
 } from './data';
 
 import {
@@ -43,21 +66,86 @@ export default class Model {
     this._onLikeNow = handler;
   }
 
-  set currentHaveyElementNum(num) {
-    this.setCurrentHaveyElNum(num);
+  set onViewElementSwitch(handler) {
+    this._onViewElementSwitch = handler;
+  }
+
+  set profileData(profileData) {
+    this._state = setProfileData(this._state, profileData);
   }
 
   set maxLikes(num) {
     this._state = setMaxLikes(this._state, num);
   }
 
-  set largestElementNumber(num) {
-    this._state = setLargestElementNumber(this._state, num);
+  set viewElementSwitch(bool) {
+    this._state = setViewElementSwitch(this._state, bool);
+    this._onViewElementSwitch(bool);
+  }
+
+  set scrollSpeed(scrollSpeed) {
+    this._state = setScrollSpeed(this._state, scrollSpeed);
+  }
+
+  set scrollType(scrollType) {
+    this._state = setScrollType(this._state, scrollType);
+  }
+
+  set likeDelay(likeDelay) {
+    this._state = setLikeDelay(this._state, likeDelay);
+  }
+
+  set scrollToUnlike(scrollToUnlike) {
+    this._state = setScrollToUnlike(this._state, scrollToUnlike);
+  }
+
+  set dblclickInterval(dblclickInterval) {
+    this._state = setDblclickInterval(this._state, dblclickInterval);
+  }
+
+  set currentPhotoColor(currentPhotoColor) {
+    this._state = setCurrentPhotoColor(this._state, currentPhotoColor);
+  }
+
+  set viewElementColor(viewElementColor) {
+    this._state = setViewElementColor(this._state, viewElementColor);
+  }
+
+  set viewElementPosition(viewElementPosition) {
+    this._state = setViewElementPosition(this._state, viewElementPosition);
+  }
+
+  set zoomPage(zoomPage) {
+    this._state = setZoomPage(this._state, zoomPage);
+  }
+
+  set currentHaveyElementNum(num) {
+    this.setCurrentHaveyElNum(num);
+  }
+
+  set counter(data) {
+    this._state = setCounter(this._state, data);
+    this._onLikeTotal(data.likeTotal);
+    this._onLikeToday(data.likeToday);
   }
 
   setInitState() {
-    this._state = setCounter(this._state, this.data.counter);
-    this._state = setMaxLikes(this._state, this.data.maxLikes);
+    const { viewElementSwitch, counter: { likeTotal, likeToday } } = this.data;
+    this.profileData = this.data;
+    this._onViewElementSwitch(viewElementSwitch);
+    this._onLikeTotal(likeTotal);
+    this._onLikeToday(likeToday);
+    this._onLikeNow(0);
+  }
+
+  setInitPopupState() {
+    this.profileData = this._state.profileData;
+    chrome.runtime.sendMessage({ profileState: this._state.profileData });
+  }
+
+  setPopupState(popupData) {
+    this.profileData = popupData;
+    chrome.runtime.sendMessage({ profileState: this._state.profileData });
   }
 
   setCurrentHaveyElNum(num) {
@@ -84,15 +172,12 @@ export default class Model {
   resetCounter() {
     this._state = setCounter(this._state, {
       likeTotal: 0,
-      likeToday: 0,
-      saveAll: 0,
-      saveToday: 0
+      likeToday: 0
     });
   }
 
   resetCounterToday() {
     this._state = setItemCounter(this._state, 'likeToday', 0);
-    this._state = setItemCounter(this._state, 'saveToday', 0);
   }
 
   onClick(element) {
@@ -111,7 +196,6 @@ export default class Model {
   }
 
   likeHeart(element) {
-    // console.log('likeHeart: ', element);
     const { likeNowCounter, counter: { likeTotal, likeToday } } = this._state;
     this._state = setItemCounter(this._state, 'likeTotal', likeTotal + 1);
     this._state = setItemCounter(this._state, 'likeToday',likeToday + 1);
@@ -124,7 +208,6 @@ export default class Model {
   }
 
   unlikeHeart(element) {
-    // console.log('unlikeHeart: ', element);
     const { likeTotal, likeToday } = this._state.counter;
     this._state = setItemCounter(this._state, 'likeTotal', likeTotal - 1);
     this._state = setItemCounter(this._state, 'likeToday', likeToday - 1);

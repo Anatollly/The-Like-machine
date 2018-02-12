@@ -4,14 +4,14 @@ const data = {
   maxLikes: 0
 };
 
+const profileData = {};
+
 const sendMessageToContent = (data) => {
   chrome.tabs.query({active: true, currentWindow: true}, tabs => {
     // data.url = tabs[0].url;
     chrome.tabs.sendMessage(tabs[0].id, data);
   });
 }
-
-sendMessageToContent({ state: true });
 
 chrome.browserAction.onClicked.addListener((tab) => {
   chrome.tabs.query({active: true, currentWindow: true}, tabs => {
@@ -28,12 +28,17 @@ window.onload = () => {
   const pause = document.querySelector('#pause');
   const stop = document.querySelector('#stop');
 
+  // request initial state
+  sendMessageToContent({ popupInitState: true });
+
+
+  // listening incoming messages
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log('onMessage: ', message);
-    const { state } = message;
-    if (state) maxLikesInput.value = state.maxLikes;
+    const { profileState } = message;
+    if (profileState) maxLikesInput.value = profileState.maxLikes;
   });
 
+  // listening click elements
   form.addEventListener('click', (e) => {
     if (e.target === start) data.click = 'start';
     if (e.target === pause) data.click = 'pause';
@@ -41,8 +46,9 @@ window.onload = () => {
     sendMessageToContent(data);
   })
 
+  // listening input elements
   maxLikesInput.addEventListener('input', (e) => {
-    data.maxLikes = maxLikesInput.value * 1;
-    sendMessageToContent(data);
+    profileData.maxLikes = maxLikesInput.value * 1;
+    sendMessageToContent({ popupChangeState: profileData });
   });
 };
