@@ -88,7 +88,6 @@ export default class LmControllerView {
   }
 
   setViewElementSwitch(bool) {
-    console.log('bool: ', bool);
     bool ? this.showElement() : this.hiddenElement();
   }
 

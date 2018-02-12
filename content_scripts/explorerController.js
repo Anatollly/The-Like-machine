@@ -31,16 +31,6 @@ export default class ExplorerController {
     }, 100);
   }
 
-  addListOpenPost() {
-    this.onOpenPost = (postName) => {
-      console.log('onOpenPost');
-    }
-  }
-
-  removeListOpenPost() {
-    this.onOpenPost = null;
-  }
-
   addListElement(element) {
     element.addEventListener('click', this.onElementClick.bind(this));
     element.addEventListener('dblclick', this.onElementDblclick.bind(this));
@@ -85,28 +75,39 @@ export default class ExplorerController {
     !heartFull && this.likeElement(currentNodes);
   }
 
-  clickRightArrow() {
+  goToNextElement(callback) {
+    this.onOpenPost = () => {
+      this.onOpenPost = null;
+      callback && callback();
+    };
     this.rightArrow.click();
   }
 
-  clickLeftArrow() {
+  likeNextElement() {
+
+  }
+
+  goToPrevElement(callback) {
+    this.onOpenPost = () => {
+      this.onOpenPost = null;
+      callback && callback();
+    };
     this.leftArrow.click();
   }
 
+
+
   onStartLM() {
-    this.likeCurrentElement();
-    this.clickRightArrow();
-    this.onOpenPost = () => {
-      this.clickTimerID = setTimeout(() => {
-        const { maxLikes, likeNowCounter } = this.model.state;
-        likeNowCounter < maxLikes ? this.likeCurrentElement() : this.stopLM();
-        this.clickRightArrow();
-      }, 1000);
-    }
+    this.likePhotoTimerID = setTimeout(() => {
+      this.likeCurrentElement();
+      this.likePhotoTimerID = setTimeout(() => {
+        const { profileData: { maxLikes }, likeNowCounter } = this.model.state;
+        likeNowCounter < maxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
+      }, 500);
+    }, 500);
   }
 
   startLM() {
-    console.log('startLM');
     if (!this.play) {
       this.onStartLM();
     }
@@ -114,12 +115,12 @@ export default class ExplorerController {
 
   pauseLM() {
     this.play = false;
-    clearTimeout(this.clickTimerID);
+    clearTimeout(this.likePhotoTimerID);
   }
 
   stopLM() {
     this.play = false;
-    clearTimeout(this.clickTimerID);
+    clearTimeout(this.likePhotoTimerID);
     this.model.resetLikeNowCounter();
   }
 

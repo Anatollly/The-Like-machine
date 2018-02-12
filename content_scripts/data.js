@@ -24,7 +24,6 @@ export const initialState = {
 };
 
 export const setProfileData = (data, profileData) => {
-  console.log('profileData: ', profileData);
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof profileData !== 'object') throw new Error('Invalid data type. Arguments: "profileData"');
   return Object.assign({}, data, { profileData });

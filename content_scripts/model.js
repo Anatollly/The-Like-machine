@@ -1,20 +1,6 @@
 import elementData from './elementData';
 
 import {
-  // addElementData,
-  // delElementData,
-  // setElementItemData,
-  // pushElementCoordinates,
-  // addElementNodes,
-  // delElementNodes,
-  // setCurrentHaveyElementNum,
-  // setMaxLikes,
-  // setLikeNowCounter,
-  // setViewElementSwitch,
-  // setItemCounter,
-  // setCounter,
-  // initialState,
-  // setLargestElementNumber
   initialState,
   setProfileData,
   setItemCounter,
@@ -51,6 +37,7 @@ export default class Model {
   }
 
   get state() {
+    console.log('state: ', this._state);
     return this._state;
   }
 
@@ -196,7 +183,8 @@ export default class Model {
   }
 
   likeHeart(element) {
-    const { likeNowCounter, counter: { likeTotal, likeToday } } = this._state;
+    console.log('state: ', this._state);
+    const { likeNowCounter, profileData: { counter: { likeTotal, likeToday } } } = this._state;
     this._state = setItemCounter(this._state, 'likeTotal', likeTotal + 1);
     this._state = setItemCounter(this._state, 'likeToday',likeToday + 1);
     this._state = setLikeNowCounter(this._state, likeNowCounter + 1);
@@ -208,7 +196,7 @@ export default class Model {
   }
 
   unlikeHeart(element) {
-    const { likeTotal, likeToday } = this._state.counter;
+    const { likeTotal, likeToday } = this._state.profileData.counter;
     this._state = setItemCounter(this._state, 'likeTotal', likeTotal - 1);
     this._state = setItemCounter(this._state, 'likeToday', likeToday - 1);
     this._onLikeTotal(likeTotal - 1);

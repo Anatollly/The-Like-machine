@@ -203,7 +203,7 @@ export default class HaveyController {
   onStartLM() {
     this.likeCurrentElement();
     this.scrollTimerID = setInterval(() => {
-      const { maxLikes, likeNowCounter } = this.model.state;
+      const { profileData: { maxLikes }, likeNowCounter } = this.model.state;
       likeNowCounter < maxLikes ? this.likeNextElement() : this.stopLM();
     }, 1000);
   }

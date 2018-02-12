@@ -1,10 +1,9 @@
 const data = {
   click: '',
-  url: '',
-  maxLikes: 0
+  url: ''
 };
 
-const profileData = {};
+let profileData = {};
 
 const sendMessageToContent = (data) => {
   chrome.tabs.query({active: true, currentWindow: true}, tabs => {
@@ -35,15 +34,53 @@ window.onload = () => {
   // listening incoming messages
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { profileState } = message;
-    if (profileState) maxLikesInput.value = profileState.maxLikes;
+    if (profileState) {
+      const {
+        counter: {
+          likeTotal,
+          likeToday
+        },
+        maxLikes,
+        viewElementSwitch,
+        version,
+        scrollSpeed,
+        scrollType,
+        likeDelay,
+        scrollToUnlike,
+        dblclickInterval,
+        currentPhotoColor,
+        viewElementColor,
+        viewElementPosition,
+        zoomPage
+      } = profileState;
+
+      profileData = {
+        counter: {
+          likeTotal,
+          likeToday
+        },
+        maxLikes,
+        viewElementSwitch,
+        version,
+        scrollSpeed,
+        scrollType,
+        likeDelay,
+        scrollToUnlike,
+        dblclickInterval,
+        currentPhotoColor,
+        viewElementColor,
+        viewElementPosition,
+        zoomPage
+      };
+      maxLikesInput.value = profileData.maxLikes;
+    }
   });
 
   // listening click elements
   form.addEventListener('click', (e) => {
-    if (e.target === start) data.click = 'start';
-    if (e.target === pause) data.click = 'pause';
-    if (e.target === stop) data.click = 'stop';
-    sendMessageToContent(data);
+    if (e.target === start) sendMessageToContent({click: 'start'});
+    if (e.target === pause) sendMessageToContent({click: 'pause'});
+    if (e.target === stop) sendMessageToContent({click: 'stop'});
   })
 
   // listening input elements
