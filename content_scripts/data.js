@@ -9,7 +9,7 @@ export const initialState = {
     version: 'free',
     scrollSpeed: 800,
     scrollType: 'out-expo',
-    likeDelay: 1000,
+    likeDelay: 500,
     scrollToUnlike: true,
     dblclickInterval: 300,
     currentPhotoColor: 'rgba(100, 100, 100, 0.3)',

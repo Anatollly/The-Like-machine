@@ -163,9 +163,9 @@ export default class HaveyController {
   scrollToElement(element, callback) {
     scrollToEl(element, this.scrollSettings);
     let height = -1;
-    const scrollID = setInterval(() => {
+    this.scrollID = setInterval(() => {
       if (height === this.height) {
-        clearInterval(scrollID);
+        clearInterval(this.scrollID);
         callback && callback();
       } else {
         height = this.height;
@@ -174,7 +174,7 @@ export default class HaveyController {
   }
 
   likeElement(elementNodes) {
-    const image = elementNodes.dblclickImageElement;
+    const image = elementData(elementNodes.element).dblclickImageElement;
     const heart = elementNodes.heartElement;
     image ? image.dispatchEvent(new MouseEvent('dblclick', {'bubbles': true})) : heart.click();
   }
@@ -195,37 +195,39 @@ export default class HaveyController {
     !heartFull && this.likeElement(currentNodes);
   }
 
-  likeNextElement() {
+  goToNextElement(callback) {
     const { nextNodes } = this;
-    nextNodes && this.scrollToElement(nextNodes.element, this.likeCurrentElement.bind(this));
+    nextNodes && this.scrollToElement(nextNodes.element, callback);
   }
 
   onStartLM() {
-    this.likeCurrentElement();
-    this.scrollTimerID = setInterval(() => {
-      const { profileData: { maxLikes }, likeNowCounter } = this.model.state;
-      likeNowCounter < maxLikes ? this.likeNextElement() : this.stopLM();
-    }, 1000);
+    if (this.play) {
+      this.likeCurrentElement();
+      this.likePhotoTimerID = setTimeout(() => {
+        const { profileData: { maxLikes }, likeNowCounter } = this.model.state;
+        likeNowCounter < maxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
+      }, 500);
+    }
   }
 
   startLM() {
     if (!this.play) {
       this.play = true;
-      this.removeListSpace();
+      this.ignoreKeyboard();
       this.onStartLM();
     }
   }
 
   pauseLM() {
     this.play = false;
-    clearTimeout(this.scrollTimerID);
-    this.addListSpace();
+    clearTimeout(this.likePhotoTimerID);
+    this.addListKeyboard();
   }
 
   stopLM() {
     this.play = false;
-    clearTimeout(this.scrollTimerID);
-    this.addListSpace();
+    clearTimeout(this.likePhotoTimerID);
+    this.addListKeyboard();
     this.model.resetLikeNowCounter();
   }
 
@@ -251,47 +253,82 @@ export default class HaveyController {
     nextNodes && this.scrollToElement(nextNodes.element, () => {console.log('stop prev')});
   }
 
+  onClickRight(e) {
+    try {
+      elementData(this.currentNodes.element).rightChevron.click();
+    } catch (e) {
+      console.log('no right chevron');
+    }
+  }
+
+  onClickLeft(e) {
+    try {
+      elementData(this.currentNodes.element).leftChevron.click();
+    } catch (e) {
+      console.log('no left chevron');
+    }
+  }
+
+  onClickEnter(e) {
+    try {
+      elementData(this.currentNodes.element).playElement.click();
+    } catch (e) {
+      console.log('no play element');
+    }
+  }
+
   onDblclickSpace(e) {
     this.clickCurrentElement();
   }
 
   onSpace(e) {
-    if (e.keyCode === 32 && e.target == document.body) {
-      e.preventDefault();
-      if (this.spaceInterval) {
-        clearTimeout(this.timerSpaceID);
+    e.preventDefault();
+    if (this.spaceInterval) {
+      clearTimeout(this.timerSpaceID);
+      this.spaceInterval = false;
+      this.onDblclickSpace(e);
+    } else {
+      this.spaceInterval = true;
+      this.timerSpaceID = setTimeout(() => {
         this.spaceInterval = false;
-        this.onDblclickSpace(e);
-      } else {
-        this.spaceInterval = true;
-        this.timerSpaceID = setTimeout(() => {
-          this.spaceInterval = false;
-          this.onClickSpace(e);
-        }, 300);
-      }
+        this.onClickSpace(e);
+      }, 300);
     }
   }
 
-  onArrows(e) {
-    if (e.keyCode === 40 && e.target == document.body) {
-      e.preventDefault();
-      this.onClickDown(e);
-    }
-    if (e.keyCode === 38 && e.target == document.body) {
-      e.preventDefault();
-      this.onClickUp(e);
+  onKeyboard(e) {
+    switch (e.keyCode) {
+      case 32:
+        this.onSpace(e);
+        break;
+      case 40:
+        this.onClickDown(e);
+        break;
+      case 38:
+        this.onClickUp(e);
+        break;
+      case 39:
+        this.onClickRight(e);
+        break;
+      case 37:
+        this.onClickLeft(e);
+        break;
+      case 13:
+        this.onClickEnter(e);
+        break;
     }
   }
 
-  addListSpace() {
-    window.onkeypress = this.onSpace.bind(this);
-    window.onkeydown = this.onArrows.bind(this);
+  addListKeyboard() {
+    window.onkeydown = this.onKeyboard.bind(this);
   }
 
-  removeListSpace() {
-    window.onkeypress = (e) => {
-      if (e.keyCode == 32 && e.target == document.body) e.preventDefault();
-    }
+  ignoreKeyboard() {
+    window.onkeydown = e => e.preventDefault();
+  }
+
+  removeListKeyboard() {
+    window.onkeydown = null;
   }
 
   setHeightScroll() {
@@ -300,23 +337,32 @@ export default class HaveyController {
     this.bottom = height + delta;
   }
 
-  collectDataStart() {
-    this.numberingElements(() => {
-      this.addListInsertElement();
-      this.addListRemoveElement();
-      this.model.currentHaveyElementNum = 0;
-    });
-
-    window.onscroll = () => {
-      this.height = window.pageYOffset;
-      if (this.height > this.bottom || this.height < this.top) {
-        this.setHeightScroll();
-        this.setCurrentElement();
-      }
+  startController() {
+    try {
+      this.haveyTimerID = setInterval(() => {
+        if (this.haveyElement) {
+          clearInterval(this.haveyTimerID);
+          this.numberingElements(() => {
+            this.addListInsertElement();
+            this.addListRemoveElement();
+            this.model.currentHaveyElementNum = 0;
+          });
+          window.onscroll = () => {
+            this.height = window.pageYOffset;
+            if (this.height > this.bottom || this.height < this.top) {
+              this.setHeightScroll();
+              this.setCurrentElement();
+            }
+          }
+          this.addListKeyboard();
+        }
+      }, 300);
+    } catch (e) {
+      this.stopController();
     }
   }
 
-  collectDataStop() {
+  stopController() {
     window.onscroll = () => {};
     this.removeListInsertElement();
     this.removeListRemoveElement();
@@ -326,5 +372,11 @@ export default class HaveyController {
         this.removeListElement(elementsNodes[item].element);
       })
     }
+    this.removeListKeyboard();
+    clearTimeout(this.likePhotoTimerID);
+    clearInterval(this.scrollID);
+    clearTimeout(this.timerSpaceID);
+    clearInterval(this.haveyTimerID);
   }
+
 }

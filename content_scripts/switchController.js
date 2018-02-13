@@ -19,9 +19,8 @@ export default class SwitchController {
   }
 
   onSwitchExplorer(postName) {
-    console.log('onSwitchExplorer postName: ', postName);
-    if (this._controller !== this.explorerController) this.switchToExplorerController();
-    postName && this.explorerController.openPost(postName);
+    if(this._controller !== this.explorerController) this.switchToExplorerController();
+    this.explorerController.openPost(postName);
   }
 
   onSwitchOff() {
@@ -29,24 +28,21 @@ export default class SwitchController {
   }
 
   switchToHaveyController() {
-    console.log('switch havey');
     this._controller = this.haveyController;
-    this.haveyController.addListSpace();
-    this.haveyController.collectDataStart();
+    this.haveyController.startController();
+    this.explorerController.stopController();
   }
 
-  switchToExplorerController(postName) {
-    console.log('switch explorer');
+  switchToExplorerController() {
     this._controller = this.explorerController;
-    this.haveyController.removeListSpace();
-    this.haveyController.collectDataStop();
+    this.explorerController.startController();
+    this.haveyController.stopController();
   }
 
   switchOffController() {
-    console.log('switch off');
     this._controller = null;
-    this.haveyController.removeListSpace();
-    this.haveyController.collectDataStop();
+    this.haveyController.stopController();
+    this.explorerController.stopController();
   }
 }
 

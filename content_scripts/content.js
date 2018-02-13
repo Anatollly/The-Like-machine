@@ -36,7 +36,7 @@ const handUrl = (url, controller) => {
       controller.onSwitchExplorer(postName);
       break;
     case 'explore':
-      controller.onSwitchExplorer();
+      controller.onSwitchOff();
       break;
     default:
       controller.onSwitchOff();
@@ -73,7 +73,6 @@ window.onload = () => {
   controller.model.setInitState();
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log('message: ', message);
     const {
       onload,
       click,
@@ -92,6 +91,7 @@ window.onload = () => {
     if (popupChangeState) controller.model.setPopupState(popupChangeState);
     if (viewElementSwitch) handViewElementSwitch(viewElementSwitch, controller.model);
 
+    if (url) console.log('current controller: ', controller.controller);
   });
   chrome.runtime.sendMessage({ status: 'onload' });
 };

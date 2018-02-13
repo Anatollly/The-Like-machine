@@ -37,7 +37,6 @@ export default class Model {
   }
 
   get state() {
-    console.log('state: ', this._state);
     return this._state;
   }
 
@@ -183,7 +182,6 @@ export default class Model {
   }
 
   likeHeart(element) {
-    console.log('state: ', this._state);
     const { likeNowCounter, profileData: { counter: { likeTotal, likeToday } } } = this._state;
     this._state = setItemCounter(this._state, 'likeTotal', likeTotal + 1);
     this._state = setItemCounter(this._state, 'likeToday',likeToday + 1);
