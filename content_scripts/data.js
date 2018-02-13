@@ -144,7 +144,7 @@ export const addElementNodes = (data, nodes, num) => {
   if (typeof nodes !== 'object') throw new Error('Invalid data type. Arguments: "nodes"');
   if (typeof num !== 'number') throw new Error('Invalid data type. Arguments: "num"');
   if (!nodes) throw new Error('Element nodes lost');
-  if (num < 0) throw new Error('Element number can not be less than zero. Number: ' + num);
+  // if (num < 0) throw new Error('Element number can not be less than zero. Number: ' + num);
   data.elementsNodes[num] = nodes;
   return Object.assign({}, data);
 };
@@ -152,8 +152,8 @@ export const addElementNodes = (data, nodes, num) => {
 export const delElementNodes = (data, num) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof num !== 'number') throw new Error('Invalid data type. Arguments: "num"');
-  if (!data.elementsNodes[num]) throw new Error('Element to delete does not exist. Number ' + num);
-  if (num < 0) throw new Error('Element number can not be less than zero. Number: ' + num);
+  // if (!data.elementsNodes[num]) throw new Error('Element to delete does not exist. Number ' + num);
+  // if (num < 0) throw new Error('Element number can not be less than zero. Number: ' + num);
   const del = delete data.elementsNodes[num];
   if (!del) console.log('Error delete');
   return Object.assign({}, data);
@@ -162,13 +162,13 @@ export const delElementNodes = (data, num) => {
 export const setCurrentHaveyElementNum = (data, num) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof num !== 'number') throw new Error('Invalid data type. Arguments: "num"');
-  if (num < 0) throw new Error('Element number can not be less than zero. Number: ' + num);
+  // if (num < 0) throw new Error('Element number can not be less than zero. Number: ' + num);
   return Object.assign({}, data, { currentHaveyElementNum: num });
 };
 
 export const setLikeNowCounter = (data, num) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof num !== 'number') throw new Error('Invalid data type. Arguments: "num"');
-  if (num < 0) throw new Error('Element number can not be less than zero. Number: ' + num);
+  // if (num < 0) throw new Error('Element number can not be less than zero. Number: ' + num);
   return Object.assign({}, data, { likeNowCounter: num });
 }

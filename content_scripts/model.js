@@ -136,7 +136,8 @@ export default class Model {
 
   setCurrentHaveyElNum(num) {
     const { elementsNodes, currentHaveyElementNum } = this._state;
-    handlePrevElement(elementsNodes[currentHaveyElementNum].element);
+    const prevElementNodes = elementsNodes[currentHaveyElementNum];
+    prevElementNodes && handlePrevElement(prevElementNodes.element);
     this._state = setCurrentHaveyElementNum(this._state, num);
     handleCurrentElement(elementsNodes[num].element);
   }

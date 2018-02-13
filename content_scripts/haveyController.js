@@ -46,54 +46,64 @@ export default class HaveyController {
   numberingElements(callback) {
     const { haveyElement } = this;
     const elements = haveyElement.querySelectorAll('article');
+    let currentElement = false;
     elements.forEach((item, i) => {
       this.setNumElement(item, i);
       this.lastElementCount = i;
       this.model.addElNodes(item, i);
       this.addListElement(item);
+      const top = item.getBoundingClientRect().top;
+      if (top > 0 && !currentElement) {
+        this.model.currentHaveyElementNum = i;
+        currentElement = true;
+      }
       if (elements.length - 1 === i) callback();
     })
   }
 
   addListInsertElement() {
-    const haveyElement = this.haveyElement;
-    haveyElement && haveyElement.addEventListener('DOMNodeInserted', this.onInsertElement.bind(this));
+    this.haveyElement.addEventListener('DOMNodeInserted', this.onInsertElement.bind(this));
   };
 
   removeListInsertElement() {
-    const haveyElement = this.haveyElement;
-    haveyElement && haveyElement.removeEventListener('DOMNodeInserted', this.onInsertElement.bind(this));
+    this.haveyElement.removeEventListener('DOMNodeInserted', this.onInsertElement.bind(this));
   }
 
   addListRemoveElement() {
-    const haveyElement = this.haveyElement;
-    haveyElement && haveyElement.addEventListener('DOMNodeRemoved', this.onRemoveElement.bind(this));
+    this.haveyElement.addEventListener('DOMNodeRemoved', this.onRemoveElement.bind(this));
   }
 
   removeListRemoveElement() {
-    const haveyElement = this.haveyElement;
-    haveyElement && haveyElement.removeEventListener('DOMNodeRemoved', this.onRemoveElement.bind(this));
+    this.haveyElement.removeEventListener('DOMNodeRemoved', this.onRemoveElement.bind(this));
   }
 
   onInsertElement(e) {
-    const { target, relatedNode } = e;
-    if (target.tagName === 'ARTICLE') {
-      const childNodes = e.relatedNode.childNodes;
-      const lastChildNumberElement = childNodes[childNodes.length - 2].dataset.numberElement * 1;
-      const firstChildNumberElement = childNodes[1].dataset.numberElement * 1;
-      if (relatedNode.lastChild === target) this.addLastElement(target, lastChildNumberElement);
-      if (relatedNode.firstChild === target) this.addFirstElement(target, firstChildNumberElement);
+    try {
+      const { target, relatedNode } = e;
+      if (target.tagName === 'ARTICLE') {
+        const childNodes = e.relatedNode.childNodes;
+        const lastChildNumberElement = childNodes[childNodes.length - 2].dataset.numberElement * 1;
+        const firstChildNumberElement = childNodes[1].dataset.numberElement * 1;
+        if (relatedNode.lastChild === target) this.addLastElement(target, lastChildNumberElement);
+        if (relatedNode.firstChild === target) this.addFirstElement(target, firstChildNumberElement);
+      }
+    } catch (e) {
+      this.restartController();
     }
   }
 
   onRemoveElement(e) {
-    const { target, relatedNode } = e;
-    if (target.tagName === 'ARTICLE') {
-      const numberElement = target.dataset.numberElement * 1;
-      const lastChildNumberElement = relatedNode.lastChild.dataset.numberElement * 1;
-      const firstChildNumberElement = relatedNode.firstChild.dataset.numberElement * 1;
-      if (lastChildNumberElement === numberElement) this.removeLastElement(target, lastChildNumberElement);
-      if (firstChildNumberElement === numberElement) this.removeFirstElement(target, firstChildNumberElement);
+    try {
+      const { target, relatedNode } = e;
+      if (target.tagName === 'ARTICLE') {
+        const numberElement = target.dataset.numberElement * 1;
+        const lastChildNumberElement = relatedNode.lastChild.dataset.numberElement * 1;
+        const firstChildNumberElement = relatedNode.firstChild.dataset.numberElement * 1;
+        if (lastChildNumberElement === numberElement) this.removeLastElement(target, lastChildNumberElement);
+        if (firstChildNumberElement === numberElement) this.removeFirstElement(target, firstChildNumberElement);
+      }
+    } catch (e) {
+      this.restartController();
     }
   }
 
@@ -151,13 +161,18 @@ export default class HaveyController {
   }
 
   setCurrentElement() {
-    const { currentHaveyElementNum, elementsNodes } = this.model.state;
-    const heightLine = this.windowHeight / 2;
-    const nextElement = this.nextNodes && this.nextNodes.element;
-    const topHeightNextElement = nextElement && nextElement.getBoundingClientRect().top
-    const topHeightCurrentElement = this.currentNodes.element.getBoundingClientRect().top;
-    if (heightLine > topHeightNextElement) this.model.currentHaveyElementNum = currentHaveyElementNum + 1;
-    if (heightLine < topHeightCurrentElement) this.model.currentHaveyElementNum = currentHaveyElementNum  - 1;
+    try {
+      const { currentHaveyElementNum, elementsNodes } = this.model.state;
+      const heightLine = this.windowHeight / 2;
+      const nextElement = this.nextNodes && this.nextNodes.element;
+      const topHeightNextElement = nextElement && nextElement.getBoundingClientRect().top
+      console.log('currentNodes: ', this.currentNodes);
+      const topHeightCurrentElement = this.currentNodes.element.getBoundingClientRect().top;
+      if (heightLine > topHeightNextElement) this.model.currentHaveyElementNum = currentHaveyElementNum + 1;
+      if (heightLine < topHeightCurrentElement) this.model.currentHaveyElementNum = currentHaveyElementNum  - 1;
+    } catch (e) {
+      this.restartController();
+    }
   }
 
   scrollToElement(element, callback) {
@@ -345,7 +360,7 @@ export default class HaveyController {
           this.numberingElements(() => {
             this.addListInsertElement();
             this.addListRemoveElement();
-            this.model.currentHaveyElementNum = 0;
+            // this.model.currentHaveyElementNum = 0;
           });
           window.onscroll = () => {
             this.height = window.pageYOffset;
@@ -377,6 +392,20 @@ export default class HaveyController {
     clearInterval(this.scrollID);
     clearTimeout(this.timerSpaceID);
     clearInterval(this.haveyTimerID);
+  }
+
+  restartController() {
+    console.log('restart controller');
+    this.stopController();
+      let height = this.height;
+      this.scrollID = setInterval(() => {
+        if (height === this.height) {
+          clearInterval(this.scrollID);
+          this.startController();
+        } else {
+          height = this.height;
+        }
+      }, 50)
   }
 
 }
