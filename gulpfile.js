@@ -14,7 +14,11 @@ gulp.task('content_scripts', function () {
       devtool: 'source-map',
       module: {
         loaders: [
-          { test: /\.js$/, loader: 'babel-loader' }
+          {
+            test: /\.js$/,
+            loader: 'babel-loader',
+            exclude: /node_modules/
+          }
         ]
       },
       output: {
@@ -31,7 +35,11 @@ gulp.task('background_scripts', function () {
       devtool: 'source-map',
       module: {
         loaders: [
-          { test: /\.js$/, loader: 'babel-loader' }
+          {
+            test: /\.js$/,
+            loader: 'babel-loader',
+            exclude: /node_modules/
+          }
         ]
       },
       output: {
@@ -48,7 +56,11 @@ gulp.task('popup_scripts', function () {
       devtool: 'source-map',
       module: {
         loaders: [
-          { test: /\.js$/, loader: 'babel-loader' }
+          {
+            test: /\.js$/,
+            loader: 'babel-loader',
+            exclude: /node_modules/
+          }
         ]
       },
       output: {

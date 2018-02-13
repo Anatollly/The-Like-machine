@@ -168,13 +168,7 @@ export default class Model {
   }
 
   onClick(element) {
-    const postLink = elementData(element).postLink;
-    this._state.elementsData.hasOwnProperty(postLink) ? this.unlikeHeart(element) : this.likeHeart(element);
-  }
-
-  onClick(element) {
-    const postLink = elementData(element).postLink;
-    this._state.elementsData.hasOwnProperty(postLink) ? this.unlikeHeart(element) : this.likeHeart(element);
+    elementData(element).heartFull ? this.unlikeHeart(element) : this.likeHeart(element);
   }
 
   onDblclick(element) {
@@ -183,6 +177,7 @@ export default class Model {
   }
 
   likeHeart(element) {
+    console.log('likeHeart');
     const { likeNowCounter, profileData: { counter: { likeTotal, likeToday } } } = this._state;
     this._state = setItemCounter(this._state, 'likeTotal', likeTotal + 1);
     this._state = setItemCounter(this._state, 'likeToday',likeToday + 1);
@@ -195,6 +190,7 @@ export default class Model {
   }
 
   unlikeHeart(element) {
+    console.log('unlikeHeart');
     const { likeTotal, likeToday } = this._state.profileData.counter;
     this._state = setItemCounter(this._state, 'likeTotal', likeTotal - 1);
     this._state = setItemCounter(this._state, 'likeToday', likeToday - 1);

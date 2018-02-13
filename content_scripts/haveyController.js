@@ -1,6 +1,15 @@
 import elementData from './elementData';
 
 import scrollToEl from 'scroll-to-element';
+import ScrollEvents from 'scroll-events';
+
+
+const scrollEvents = new ScrollEvents()
+const onScrollStop = () => {};
+// scrollEvents.on('scroll:stop', () => {
+//   console.log('scrollEvents ---------- stop');
+//   callback && callback();
+// })
 
 export default class HaveyController {
   constructor(model) {
@@ -53,7 +62,7 @@ export default class HaveyController {
       this.model.addElNodes(item, i);
       this.addListElement(item);
       const top = item.getBoundingClientRect().top;
-      if (top > 0 && !currentElement) {
+      if (top > -300 && !currentElement) {
         this.model.currentHaveyElementNum = i;
         currentElement = true;
       }
@@ -62,19 +71,23 @@ export default class HaveyController {
   }
 
   addListInsertElement() {
-    this.haveyElement.addEventListener('DOMNodeInserted', this.onInsertElement.bind(this));
+    const haveyElement = this.haveyElement;
+    haveyElement && haveyElement.addEventListener('DOMNodeInserted', this.onInsertElement.bind(this));
   };
 
   removeListInsertElement() {
-    this.haveyElement.removeEventListener('DOMNodeInserted', this.onInsertElement.bind(this));
+    const haveyElement = this.haveyElement;
+    haveyElement && haveyElement.removeEventListener('DOMNodeInserted', this.onInsertElement.bind(this));
   }
 
   addListRemoveElement() {
-    this.haveyElement.addEventListener('DOMNodeRemoved', this.onRemoveElement.bind(this));
+    const haveyElement = this.haveyElement;
+    haveyElement && haveyElement.addEventListener('DOMNodeRemoved', this.onRemoveElement.bind(this));
   }
 
   removeListRemoveElement() {
-    this.haveyElement.removeEventListener('DOMNodeRemoved', this.onRemoveElement.bind(this));
+    const haveyElement = this.haveyElement;
+    haveyElement && haveyElement.removeEventListener('DOMNodeRemoved', this.onRemoveElement.bind(this));
   }
 
   onInsertElement(e) {
@@ -166,7 +179,6 @@ export default class HaveyController {
       const heightLine = this.windowHeight / 2;
       const nextElement = this.nextNodes && this.nextNodes.element;
       const topHeightNextElement = nextElement && nextElement.getBoundingClientRect().top
-      console.log('currentNodes: ', this.currentNodes);
       const topHeightCurrentElement = this.currentNodes.element.getBoundingClientRect().top;
       if (heightLine > topHeightNextElement) this.model.currentHaveyElementNum = currentHaveyElementNum + 1;
       if (heightLine < topHeightCurrentElement) this.model.currentHaveyElementNum = currentHaveyElementNum  - 1;
@@ -212,7 +224,11 @@ export default class HaveyController {
 
   goToNextElement(callback) {
     const { nextNodes } = this;
-    nextNodes && this.scrollToElement(nextNodes.element, callback);
+    if (nextNodes) {
+      this.scrollToElement(nextNodes.element, callback);
+    } else {
+      this.stopLM();
+    }
   }
 
   onStartLM() {
@@ -250,22 +266,22 @@ export default class HaveyController {
     const { currentNodes, nextNodes } = this;
     const topCurrentElement = currentNodes.element.getBoundingClientRect().top;
     if (topCurrentElement < 50 || topCurrentElement > 100) {
-      this.scrollToElement(currentNodes.element, () => {console.log('stop current')});
+      scrollToEl(currentNodes.element, this.scrollSettings);
     } else {
-      nextNodes && this.scrollToElement(nextNodes.element, () => {console.log('stop next')});
+      nextNodes && scrollToEl(nextNodes.element, this.scrollSettings);
     }
   }
 
   onClickUp(e) {
     const { currentNodes, prevNodes } = this;
     const topCurrentElement = currentNodes.element.getBoundingClientRect().top;
-    prevNodes && this.scrollToElement(prevNodes.element, () => {console.log('stop prev')});
+    prevNodes && scrollToEl(prevNodes.element, this.scrollSettings);
   }
 
   onClickDown(e) {
     const { currentNodes, nextNodes } = this;
     const topCurrentElement = currentNodes.element.getBoundingClientRect().top;
-    nextNodes && this.scrollToElement(nextNodes.element, () => {console.log('stop prev')});
+    nextNodes && scrollToEl(nextNodes.element, this.scrollSettings);
   }
 
   onClickRight(e) {
@@ -355,12 +371,11 @@ export default class HaveyController {
   startController() {
     try {
       this.haveyTimerID = setInterval(() => {
-        if (this.haveyElement) {
+        if (this.haveyElement.querySelectorAll('article').length > 3) {
           clearInterval(this.haveyTimerID);
           this.numberingElements(() => {
             this.addListInsertElement();
             this.addListRemoveElement();
-            // this.model.currentHaveyElementNum = 0;
           });
           window.onscroll = () => {
             this.height = window.pageYOffset;
@@ -395,7 +410,6 @@ export default class HaveyController {
   }
 
   restartController() {
-    console.log('restart controller');
     this.stopController();
       let height = this.height;
       this.scrollID = setInterval(() => {

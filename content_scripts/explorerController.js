@@ -30,6 +30,11 @@ export default class ExplorerController {
             !this.play && this.addListKeyboard();
             clearInterval(this.openPostTimerID);
             this.currentNodes = this.elementNodes;
+            if (this.element !== this.currentNodes.element) {
+              this.addListElement(this.currentNodes.element);
+              this.element && this.removeListElement(this.element)
+            }
+            this.element = this.currentNodes.element;
             this.rightArrow = elementData(this.currentNodes.element).rightArrow;
             this.leftArrow = elementData(this.currentNodes.element).leftArrow;
             this.onOpenPost && this.onOpenPost(postName);
@@ -53,14 +58,14 @@ export default class ExplorerController {
   }
 
   onElementClick(e) {
-    const elementNodes = this.elementsNodes;
-    if (e.target === elementNodes.heartElement) this.model.onClick(elementNodes.element);
+    const currentNodes = this.currentNodes;
+    if (e.target === currentNodes.heartElement) this.model.onClick(currentNodes.element);
   }
 
   onElementDblclick(e) {
-    const elementNodes = this.elementsNodes;
-    if (e.target === elementNodes.dblclickImageElement || e.target.classList[0] === '_rcw2i') {
-      this.model.onDblclick(elementNodes.element);
+    const currentNodes = this.currentNodes;
+    if (e.target === currentNodes.dblclickImageElement || e.target.classList[0] === '_rcw2i') {
+      this.model.onDblclick(currentNodes.element);
     }
   }
 
@@ -223,10 +228,12 @@ export default class ExplorerController {
   stopController() {
     this.openingPost = false;
     this.play = false;
+    this.onOpenPost = null;
     clearInterval(this.openPostTimerID);
     clearTimeout(this.likePhotoTimerID);
     this.model.resetLikeNowCounter();
     this.removeListKeyboard();
+    this.element && this.removeListElement(this.element)
   }
 
 }
