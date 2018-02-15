@@ -73,8 +73,7 @@ export default class LmControllerView {
     this.model.onLikeToday = this.setTodayLikes.bind(this);
     this.model.onLikeNow = this.setNowLikes.bind(this);
     this.model.onViewElementSwitch = this.setViewElementSwitch.bind(this);
-    this.model.onBackgroundColor = this.setBackgroundColor.bind(this);
-    this.model.onCounterPosition = this.setCounterPosition.bind(this);
+    this.model.onStyleViewElement = this.setStyleViewElement.bind(this);
   }
 
   setTotalLikes(num) {
@@ -93,12 +92,8 @@ export default class LmControllerView {
     bool === 'true' ? this.showElement() : this.hiddenElement();
   }
 
-  setBackgroundColor(color) {
-    this.element.style.backgroundColor = color;
-  }
-
-  setCounterPosition(position) {
-    this.element.style = position;
+  setStyleViewElement(color, position) {
+    this.element.style = `background-color: ${color}; ${position} `;
   }
 
   addElement() {

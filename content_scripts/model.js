@@ -56,12 +56,8 @@ export default class Model {
     this._onViewElementSwitch = handler;
   }
 
-  set onBackgroundColor(handler) {
-    this._onBackgroundColor = handler;
-  }
-
-  set onCounterPosition(handler) {
-    this._onCounterPosition = handler;
+  set onStyleViewElement(handler) {
+    this._onStyleViewElement = handler;
   }
 
   set profileData(profileData) {
@@ -139,8 +135,7 @@ export default class Model {
     this._onLikeTotal(likeTotal);
     this._onLikeToday(likeToday);
     this._onLikeNow(0);
-    this._onBackgroundColor(viewElementColor);
-    this._onCounterPosition(viewElementPosition);
+    this._onStyleViewElement(viewElementColor, viewElementPosition);
     chrome.runtime.sendMessage({ pageZoom });
   }
 
@@ -157,9 +152,8 @@ export default class Model {
     this.profileData = popupData;
     chrome.runtime.sendMessage({ profileState: this._state.profileData });
     handleCurrentElement(elementsNodes[currentHaveyElementNum].element, currentPhotoColor);
-    this._onBackgroundColor(viewElementColor);
+    this._onStyleViewElement(viewElementColor, viewElementPosition);
     this._onViewElementSwitch(viewElementSwitch);
-    this._onCounterPosition(viewElementPosition);
     chrome.runtime.sendMessage({ pageZoom });
   }
 

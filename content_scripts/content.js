@@ -8,7 +8,7 @@ const profileData = {
     likeToday: 303
   },
   maxLikes: 88,
-  viewElementSwitch: 'false',
+  viewElementSwitch: 'true',
   version: 'free',
   scrollSpeed: 800,
   scrollType: 'out-expo',
@@ -18,7 +18,7 @@ const profileData = {
   currentPhotoColor: 'rgba(128,128,0,0.3)',
   viewElementColor: 'rgba(192,192,192,0.3)',
   viewElementPosition: 'right:50px;top:50px;',
-  pageZoom: 0.5,
+  pageZoom: 0.75,
   language: 'russian'
 };
 
