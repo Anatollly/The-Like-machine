@@ -8,17 +8,18 @@ const profileData = {
     likeToday: 303
   },
   maxLikes: 88,
-  viewElementSwitch: true,
+  viewElementSwitch: 'false',
   version: 'free',
   scrollSpeed: 800,
   scrollType: 'out-expo',
-  likeDelay: 1000,
-  scrollToUnlike: true,
+  likeDelay: 500,
+  scrollToUnlike: 'true',
   dblclickInterval: 300,
-  currentPhotoColor: 'rgba(100, 100, 100, 0.3)',
-  viewElementColor: 'rgba(100, 100, 100, 0.5)',
-  viewElementPosition: 'top-right',
-  zoomPage: 0.75
+  currentPhotoColor: 'rgba(128,128,0,0.3)',
+  viewElementColor: 'rgba(192,192,192,0.3)',
+  viewElementPosition: 'right:50px;top:50px;',
+  pageZoom: 0.5,
+  language: 'russian'
 };
 
 const controller = new SwitchController(profileData);
@@ -73,6 +74,7 @@ window.onload = () => {
   controller.model.setInitState();
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log('content message: ', message);
     const {
       onload,
       click,
@@ -81,6 +83,7 @@ window.onload = () => {
       machineSwitch,
       popupInitState,
       popupChangeState,
+      popupResetState,
       viewElementSwitch
     } = message;
 
@@ -89,6 +92,7 @@ window.onload = () => {
     if (maxLikes) handMaxLikes(maxLikes, controller.model);
     if (popupInitState) controller.model.setInitPopupState();
     if (popupChangeState) controller.model.setPopupState(popupChangeState);
+    if (popupResetState) controller.model.resetSettings();
     if (viewElementSwitch) handViewElementSwitch(viewElementSwitch, controller.model);
 
     if (url) console.log('current controller: ', controller.controller);

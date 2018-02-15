@@ -1,5 +1,5 @@
-export const handleCurrentElement = (element) => {
-  element.style.backgroundColor = 'rgba(100, 100, 100, 1)';
+export const handleCurrentElement = (element, color) => {
+  element.style.backgroundColor = color;
 };
 
 export const handlePrevElement = (element) => {

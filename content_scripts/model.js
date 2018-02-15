@@ -15,7 +15,7 @@ import {
   setCurrentPhotoColor,
   setViewElementColor,
   setViewElementPosition,
-  setZoomPage,
+  setPageZoom,
   addElementData,
   delElementData,
   setElementItemData,
@@ -54,6 +54,14 @@ export default class Model {
 
   set onViewElementSwitch(handler) {
     this._onViewElementSwitch = handler;
+  }
+
+  set onBackgroundColor(handler) {
+    this._onBackgroundColor = handler;
+  }
+
+  set onCounterPosition(handler) {
+    this._onCounterPosition = handler;
   }
 
   set profileData(profileData) {
@@ -101,8 +109,8 @@ export default class Model {
     this._state = setViewElementPosition(this._state, viewElementPosition);
   }
 
-  set zoomPage(zoomPage) {
-    this._state = setZoomPage(this._state, zoomPage);
+  set pageZoom(pageZoom) {
+    this._state = setPageZoom(this._state, pageZoom);
   }
 
   set currentHaveyElementNum(num) {
@@ -116,21 +124,49 @@ export default class Model {
   }
 
   setInitState() {
-    const { viewElementSwitch, counter: { likeTotal, likeToday } } = this.data;
+    const {
+      viewElementSwitch,
+      viewElementColor,
+      viewElementPosition,
+      pageZoom,
+      counter: {
+        likeTotal,
+        likeToday
+      }
+    } = this.data;
     this.profileData = this.data;
     this._onViewElementSwitch(viewElementSwitch);
     this._onLikeTotal(likeTotal);
     this._onLikeToday(likeToday);
     this._onLikeNow(0);
+    this._onBackgroundColor(viewElementColor);
+    this._onCounterPosition(viewElementPosition);
+    chrome.runtime.sendMessage({ pageZoom });
   }
 
   setInitPopupState() {
     this.profileData = this._state.profileData;
     chrome.runtime.sendMessage({ profileState: this._state.profileData });
+    // handleCurrentElement(elementsNodes[num].element, this._state.profileData.currentPhotoColor);
   }
 
   setPopupState(popupData) {
+    const { elementsNodes, currentHaveyElementNum } = this._state;
+    const { currentPhotoColor, viewElementColor, viewElementSwitch, viewElementPosition, pageZoom } = popupData;
+    console.log('pageZoom: ', pageZoom);
     this.profileData = popupData;
+    chrome.runtime.sendMessage({ profileState: this._state.profileData });
+    handleCurrentElement(elementsNodes[currentHaveyElementNum].element, currentPhotoColor);
+    this._onBackgroundColor(viewElementColor);
+    this._onViewElementSwitch(viewElementSwitch);
+    this._onCounterPosition(viewElementPosition);
+    chrome.runtime.sendMessage({ pageZoom });
+  }
+
+  resetSettings() {
+    const { counter } = this._state.profileData;
+    this.profileData = initialState.profileData
+    this.counter = counter;
     chrome.runtime.sendMessage({ profileState: this._state.profileData });
   }
 
@@ -139,7 +175,7 @@ export default class Model {
     const prevElementNodes = elementsNodes[currentHaveyElementNum];
     prevElementNodes && handlePrevElement(prevElementNodes.element);
     this._state = setCurrentHaveyElementNum(this._state, num);
-    handleCurrentElement(elementsNodes[num].element);
+    handleCurrentElement(elementsNodes[num].element, this._state.profileData.currentPhotoColor);
   }
 
   addElNodes(element, num) {

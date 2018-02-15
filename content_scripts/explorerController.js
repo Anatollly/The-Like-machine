@@ -108,14 +108,16 @@ export default class ExplorerController {
   }
 
   onStartLM() {
+    const likeDelay = this.model.state.profileData.likeDelay;
     if (this.play) {
       this.likePhotoTimerID = setTimeout(() => {
         this.likeCurrentElement();
         this.likePhotoTimerID = setTimeout(() => {
           const { profileData: { maxLikes }, likeNowCounter } = this.model.state;
+          console.log('start: ', maxLikes, likeNowCounter);
           likeNowCounter < maxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
         }, 500);
-      }, 500);
+      }, likeDelay);
     }
   }
 
@@ -178,6 +180,7 @@ export default class ExplorerController {
   }
 
   onSpace(e) {
+    const { dblclickInterval } = this.model.state.profileData;
     e.preventDefault();
     if (this.spaceInterval) {
       clearTimeout(this.timerSpaceID);
@@ -188,7 +191,7 @@ export default class ExplorerController {
       this.timerSpaceID = setTimeout(() => {
         this.spaceInterval = false;
         this.onClickSpace(e);
-      }, 300);
+      }, dblclickInterval);
     }
   }
 
@@ -214,7 +217,10 @@ export default class ExplorerController {
   }
 
   ignoreKeyboard() {
-    window.onkeydown = e => e.preventDefault();
+    window.onkeydown = e => {
+      if (e.keyCode === 39 || e.keyCode === 37) this.pauseLM();
+      if (e.keyCode === 13) e.preventDefault();
+    };
   }
 
   removeListKeyboard() {

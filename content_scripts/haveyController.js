@@ -22,11 +22,6 @@ export default class HaveyController {
     this.firstElementCount = 0;
     this.lastElementCount = 3;
     this.model = model;
-    this.scrollSettings = {
-      offset: -52,
-      ease: 'out-expo',
-      duration: 700
-    };
   }
 
   get haveyElement() {
@@ -46,6 +41,15 @@ export default class HaveyController {
   get nextNodes() {
     const { currentHaveyElementNum, elementsNodes } = this.model.state;
     return elementsNodes[currentHaveyElementNum + 1];
+  }
+
+  get scrollSettings() {
+    const { scrollSpeed, scrollType } = this.model.state.profileData;
+    return {
+      offset: -52,
+      ease: scrollType,
+      duration: scrollSpeed
+    }
   }
 
   setNumElement(element, num) {
@@ -232,12 +236,13 @@ export default class HaveyController {
   }
 
   onStartLM() {
+    const likeDelay = this.model.state.profileData.likeDelay;
     if (this.play) {
       this.likeCurrentElement();
       this.likePhotoTimerID = setTimeout(() => {
         const { profileData: { maxLikes }, likeNowCounter } = this.model.state;
         likeNowCounter < maxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
-      }, 500);
+      }, likeDelay);
     }
   }
 
@@ -313,6 +318,7 @@ export default class HaveyController {
   }
 
   onSpace(e) {
+    const { dblclickInterval } = this.model.state.profileData;
     e.preventDefault();
     if (this.spaceInterval) {
       clearTimeout(this.timerSpaceID);
@@ -323,7 +329,7 @@ export default class HaveyController {
       this.timerSpaceID = setTimeout(() => {
         this.spaceInterval = false;
         this.onClickSpace(e);
-      }, 300);
+      }, dblclickInterval);
     }
   }
 

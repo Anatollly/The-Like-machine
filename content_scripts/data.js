@@ -1,21 +1,22 @@
 export const initialState = {
   profileData: {
     counter: {
-      likeTotal: 0,
-      likeToday: 0
+      likeTotal: 2500,
+      likeToday: 303
     },
-    maxLikes: 0,
-    viewElementSwitch: false,
+    maxLikes: 50,
+    viewElementSwitch: 'true',
     version: 'free',
-    scrollSpeed: 800,
+    scrollSpeed: 700,
     scrollType: 'out-expo',
     likeDelay: 500,
-    scrollToUnlike: true,
+    scrollToUnlike: 'true',
     dblclickInterval: 300,
-    currentPhotoColor: 'rgba(100, 100, 100, 0.3)',
-    viewElementColor: 'rgba(100, 100, 100, 0.5)',
-    viewElementPosition: 'top-right',
-    zoomPage: 0
+    currentPhotoColor: 'rgba(0,128,128,0.3)',
+    viewElementColor: 'rgba(0,128,128,0.3)',
+    viewElementPosition: 'right:50px;top:50px;',
+    pageZoom: 0.75,
+    language: 'english'
   },
   elementsData: {},
   elementsNodes: {},
@@ -40,7 +41,8 @@ export const setItemCounter = (data, item, num) => {
 export const setCounter = (data, counter) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof counter !== 'object') throw new Error('Invalid data type. Arguments: "counter"');
-  return Object.assign({}, data, { profileData: { counter }});
+  const profileData = Object.assign({}, data.profileData, { counter});
+  return Object.assign({}, data, { profileData });
 };
 
 export const setMaxLikes = (data, maxLikes) => {
@@ -107,10 +109,10 @@ export const setViewElementPosition = (data, viewElementPosition) => {
   return Object.assign({}, data, { profileData: { viewElementPosition }});
 }
 
-export const setZoomPage = (data, zoomPage) => {
+export const setPageZoom = (data, pageZoom) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
-  if (typeof zoomPage !== 'string') throw new Error('Invalid data type. Arguments: "zoomPage"');
-  return Object.assign({}, data, { profileData: { zoomPage }});
+  if (typeof pageZoom !== 'string') throw new Error('Invalid data type. Arguments: "pageZoom"');
+  return Object.assign({}, data, { profileData: { pageZoom }});
 }
 
 
