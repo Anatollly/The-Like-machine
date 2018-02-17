@@ -1,8 +1,10 @@
 import elementData from './elementData';
+import moment from 'moment';
 
 import {
   initialState,
   setProfileData,
+  setFavoritesData,
   setItemCounter,
   setCounter,
   setMaxLikes,
@@ -22,7 +24,14 @@ import {
   addElementNodes,
   delElementNodes,
   setCurrentHaveyElementNum,
+  setCurrentElement,
   setLikeNowCounter,
+  setFavoritesLocations,
+  setFavoritesTags,
+  setFavoritesPhotos,
+  setFavoritesAccounts,
+  setFavorites,
+  setCurrentTag
 } from './data';
 
 import {
@@ -62,6 +71,10 @@ export default class Model {
 
   set profileData(profileData) {
     this._state = setProfileData(this._state, profileData);
+  }
+
+  set favorites(favorites) {
+    this._state = setFavoritesData(this._state, favorites);
   }
 
   set maxLikes(num) {
@@ -113,6 +126,16 @@ export default class Model {
     this.setCurrentHaveyElNum(num);
   }
 
+  set currentElement(element) {
+    this.setCurrentEl(element);
+  }
+
+  set currentTag(currentTag) {
+    console.log('currentTag: ', currentTag);
+    this._state = setCurrentTag(this._state, currentTag);
+  }
+
+
   set counter(data) {
     this._state = setCounter(this._state, data);
     this._onLikeTotal(data.likeTotal);
@@ -129,8 +152,9 @@ export default class Model {
         likeTotal,
         likeToday
       }
-    } = this.data;
-    this.profileData = this.data;
+    } = this.data.profileData;
+    this.profileData = this.data.profileData;
+    this.favorites = this.data.favorites;
     this._onViewElementSwitch(viewElementSwitch);
     this._onLikeTotal(likeTotal);
     this._onLikeToday(likeToday);
@@ -141,12 +165,13 @@ export default class Model {
 
   setInitPopupState() {
     this.profileData = this._state.profileData;
-    chrome.runtime.sendMessage({ profileState: this._state.profileData });
+    console.log('initState: ', this._state.profileData);
+    chrome.runtime.sendMessage({ profileState: this._state.profileData, favoritesState: this._state.favorites });
     // handleCurrentElement(elementsNodes[num].element, this._state.profileData.currentPhotoColor);
   }
 
   setPopupState(popupData) {
-    const { elementsNodes, currentHaveyElementNum } = this._state;
+    const { elementsNodes, currentHaveyElementNum, profileData } = this._state;
     const { currentPhotoColor, viewElementColor, viewElementSwitch, viewElementPosition, pageZoom } = popupData;
     console.log('pageZoom: ', pageZoom);
     this.profileData = popupData;
@@ -154,7 +179,7 @@ export default class Model {
     handleCurrentElement(elementsNodes[currentHaveyElementNum].element, currentPhotoColor);
     this._onStyleViewElement(viewElementColor, viewElementPosition);
     this._onViewElementSwitch(viewElementSwitch);
-    chrome.runtime.sendMessage({ pageZoom });
+    if (profileData.pageZoom !== pageZoom) chrome.runtime.sendMessage({ pageZoom });
   }
 
   resetSettings() {
@@ -169,8 +194,83 @@ export default class Model {
     const prevElementNodes = elementsNodes[currentHaveyElementNum];
     prevElementNodes && handlePrevElement(prevElementNodes.element);
     this._state = setCurrentHaveyElementNum(this._state, num);
+    this.setCurrentEl(elementsNodes[num].element);
     handleCurrentElement(elementsNodes[num].element, this._state.profileData.currentPhotoColor);
   }
+
+  setCurrentEl(element) {
+    this._state = setCurrentElement(this._state, element);
+  }
+
+  // addFavoriteLocation(locationName, locationLink) {
+  //   const locations = Object.assign({}, this._state.favorites.locations, { [locationName]: locationLink });
+  //   console.log('locations: ', locations);
+  //   this._state = setFavoritesLocations(this._state, locations);
+  // }
+  //
+  // delFavoriteLocation(loactionName) {
+  //   const locations = this._state.favorites.locations;
+  //   delete locations[loactionName];
+  //   this._state = setFavoritesLocations(this._state, locations);
+  // }
+  //
+  // addFavoriteTag(tagName, tagLink) {
+  //   const tags = Object.assign({}, this._state.favorites.tags, { [tagName]: tagLink });
+  //   this._state = setFavoritesTags(this._state, tags);
+  // }
+
+  // delFavoriteTag(tagName) {
+  //   const tags = this._state.favorites.tags;
+  //   delete tags[tagName];
+  //   this._state = setFavoritesLocations(this._state, tags);
+  // }
+  //
+  // addFavoritePhoto(photoName, photoLink) {
+  //   const photos = Object.assign({}, this._state.favorites.photos, { [photoName]: photoLink });
+  //   console.log('photos: ', photos);
+  //   this._state = setFavoritesPhotos(this._state, photos);
+  // }
+  //
+  // delFavoritePhoto(photoName) {
+  //   const photos = this._state.favorites.photos;
+  //   delete photos[photoName];
+  //   this._state = setFavoritesLocations(this._state, photos);
+  // }
+  //
+  // addFavoriteAccount(accountName, accountLink) {
+  //   const accounts = Object.assign({}, this._state.favorites.accounts, { [accountName]: accountLink });
+  //   console.log('accounts: ', accounts);
+  //   this._state = setFavoritesAccounts(this._state, accounts);
+  // }
+
+  saveFavorites() {
+    try {
+      let { type, name, link } = this._state.currentTag;
+      if (type === 'photos') {
+        const date = moment(elementData(this._state.currentElement).dateCreate).format("DD-MM-YYYY_HH:mm");
+        name = `${elementData(this._state.currentElement).userName}_${date}`;
+        if (!link) link = elementData(this._state.currentElement).postLink;
+      }
+      this._state = setFavorites(this._state, type, { [name]: link});
+      console.log(' favorites: ', this._state.favorites);
+      chrome.runtime.sendMessage({ favoritesState: this._state.favorites });
+    } catch (e) {
+      console.log('save favorites fail');
+    }
+  }
+
+  delFavoriteTag(type, name) {
+    const { favorites } = this._state;
+    delete favorites[type][name];
+    this.favorites = favorites;
+    chrome.runtime.sendMessage({ favoritesState: this._state.favorites });
+  }
+
+  // delFavoriteAccount(accountName) {
+  //   const accounts = this._state.favorites.accounts;
+  //   delete accounts[accountName];
+  //   this._state = setFavoritesLocations(this._state, accounts);
+  // }
 
   addElNodes(element, num) {
     const nodes = elementData(element).elementNodes;
@@ -228,5 +328,14 @@ export default class Model {
     this._onLikeToday(likeToday - 1);
     const elementName = elementData(element).postLink;
     this._state = delElementData(this._state, elementName);
+  }
+
+  saveImage() {
+    const src = elementData(this._state.currentElement).imageSrc;
+    const link = document.createElement("a");
+
+    link.setAttribute("href", src);
+    link.setAttribute("download", "new-image-name.jpg");
+    link.click();
   }
 }

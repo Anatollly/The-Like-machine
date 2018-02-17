@@ -34,6 +34,7 @@ export default class ExplorerController {
               this.addListElement(this.currentNodes.element);
               this.element && this.removeListElement(this.element)
             }
+            this.model.currentElement = this.currentNodes.element;
             this.element = this.currentNodes.element;
             this.rightArrow = elementData(this.currentNodes.element).rightArrow;
             this.leftArrow = elementData(this.currentNodes.element).leftArrow;

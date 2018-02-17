@@ -26,9 +26,8 @@ export default class AbstractSelectElementView {
     const numLang = languageMap[lang];
     let content = '';
     for (var [key, value] of options) {
-      if(typeof key === 'number') selectedValue *= 1;
       content += `
-        <option value=${key} ${key === selectedValue && 'selected'}>
+        <option value="${key}" ${key === selectedValue && "selected"}>
           ${value instanceof Array ? value[numLang] : value}
         </option>`;
     }

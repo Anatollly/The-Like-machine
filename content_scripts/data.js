@@ -5,7 +5,7 @@ export const initialState = {
       likeToday: 303
     },
     maxLikes: 50,
-    viewElementSwitch: 'true',
+    viewElementSwitch: true,
     version: 'free',
     scrollSpeed: 700,
     scrollType: 'out-expo',
@@ -22,12 +22,30 @@ export const initialState = {
   elementsNodes: {},
   currentHaveyElementNum: 0,
   likeNowCounter: 0,
+  currentElement: null,
+  favorites: {
+    locations: {},
+    tags: {},
+    accounts: {},
+    photos: {}
+  },
+  currentTag: {
+    type: '',
+    name: '',
+    link: ''
+  }
 };
 
 export const setProfileData = (data, profileData) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof profileData !== 'object') throw new Error('Invalid data type. Arguments: "profileData"');
   return Object.assign({}, data, { profileData });
+};
+
+export const setFavoritesData = (data, favorites) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof favorites !== 'object') throw new Error('Invalid data type. Arguments: "favorites"');
+  return Object.assign({}, data, { favorites });
 };
 
 export const setItemCounter = (data, item, num) => {
@@ -168,9 +186,58 @@ export const setCurrentHaveyElementNum = (data, num) => {
   return Object.assign({}, data, { currentHaveyElementNum: num });
 };
 
+export const setCurrentElement = (data, element) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof element !== 'object') throw new Error('Invalid data type. Arguments: "element"');
+  return Object.assign({}, data, { currentElement: element });
+};
+
 export const setLikeNowCounter = (data, num) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof num !== 'number') throw new Error('Invalid data type. Arguments: "num"');
   // if (num < 0) throw new Error('Element number can not be less than zero. Number: ' + num);
   return Object.assign({}, data, { likeNowCounter: num });
+};
+
+export const setFavoritesLocations = (data, locations) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof locations !== 'string') throw new Error('Invalid data type. Arguments: "locations"');
+  const favorites = Object.assign({}, data.favorites, { locations });
+  return Object.assign({}, data, { favorites });
+};
+
+export const setFavoritesTags = (data, tags) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof tags !== 'string') throw new Error('Invalid data type. Arguments: "tags"');
+  const favorites = Object.assign({}, data.favorites, { tags });
+  return Object.assign({}, data, { favorites });
+};
+
+export const setFavoritesPhotos = (data, photos) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof photos !== 'string') throw new Error('Invalid data type. Arguments: "photos"');
+  const favorites = Object.assign({}, data.favorites, { photos });
+  return Object.assign({}, data, { favorites });
+};
+
+export const setFavoritesAccounts = (data, accounts) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof accounts !== 'string') throw new Error('Invalid data type. Arguments: "accounts"');
+  const favorites = Object.assign({}, data.favorites, { accounts });
+  return Object.assign({}, data, { favorites });
+};
+
+export const setFavorites = (data, type, tag) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof type !== 'string') throw new Error('Invalid data type. Arguments: "type"');
+  if (typeof tag !== 'object') throw new Error('Invalid data type. Arguments: "tag"');
+  const favoritesType = Object.assign({}, data.favorites[type], tag );
+  const favorites = Object.assign({}, data.favorites, {[type]: favoritesType});
+  return Object.assign({}, data, { favorites });
 }
+
+export const setCurrentTag = (data, currentTag) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof currentTag !== 'object') throw new Error('Invalid data type. Arguments: "currentTag"');
+  return Object.assign({}, data, { currentTag });
+};

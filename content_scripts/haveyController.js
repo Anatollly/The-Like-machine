@@ -1,15 +1,7 @@
 import elementData from './elementData';
 
 import scrollToEl from 'scroll-to-element';
-import ScrollEvents from 'scroll-events';
-
-
-const scrollEvents = new ScrollEvents()
-const onScrollStop = () => {};
-// scrollEvents.on('scroll:stop', () => {
-//   console.log('scrollEvents ---------- stop');
-//   callback && callback();
-// })
+//import ScrollEvents from 'scroll-events';
 
 export default class HaveyController {
   constructor(model) {
@@ -377,7 +369,7 @@ export default class HaveyController {
   startController() {
     try {
       this.haveyTimerID = setInterval(() => {
-        if (this.haveyElement.querySelectorAll('article').length > 3) {
+        if (this.haveyElement && this.haveyElement.querySelectorAll('article').length > 3) {
           clearInterval(this.haveyTimerID);
           this.numberingElements(() => {
             this.addListInsertElement();
@@ -395,6 +387,7 @@ export default class HaveyController {
       }, 300);
     } catch (e) {
       this.stopController();
+      console.log('start havey controller fail');
     }
   }
 

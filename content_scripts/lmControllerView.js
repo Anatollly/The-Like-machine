@@ -89,7 +89,7 @@ export default class LmControllerView {
   }
 
   setViewElementSwitch(bool) {
-    bool === 'true' ? this.showElement() : this.hiddenElement();
+    bool ? this.showElement() : this.hiddenElement();
   }
 
   setStyleViewElement(color, position) {

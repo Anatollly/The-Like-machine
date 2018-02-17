@@ -4,7 +4,7 @@ export const initProfileData = {
     likeToday: 303
   },
   maxLikes: 88,
-  viewElementSwitch: 'true',
+  viewElementSwitch: true,
   version: 'free',
   scrollSpeed: 850,
   scrollType: 'out-expo',
@@ -27,6 +27,7 @@ export const translator = {
   settings: ['Settings', 'Настройки'],
   manual: ['Instruction', 'Инструкции'],
   additionally: ['Additionally', 'Дополнительно'],
+  favorites: ['Favorites', 'Избранное'],
   save: ['Save', 'Сохранить'],
   cancel: ['Cancel', 'Отменить'],
   reset: ['Reset', 'Сбросить'],
@@ -134,8 +135,8 @@ export const settigsDataSelect = (() => {
     viewElementSwitch: {
       label: showCounter,
       options: new Map([
-        ['false', no],
-        ['true', yes]
+        [false, no],
+        [true, yes]
       ])
     },
     pageZoom: {

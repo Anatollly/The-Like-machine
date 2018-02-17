@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       chrome.tabs.sendMessage(tabs[0].id, data, () => {});
     });
   }
-  if (pageZoom) chrome.tabs.setZoom(pageZoom * 1);
+  if (pageZoom) chrome.tabs.setZoom(pageZoom);
 });
 
 chrome.browserAction.setBadgeText({text: 'LM'});

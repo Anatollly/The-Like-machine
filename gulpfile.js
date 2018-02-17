@@ -17,7 +17,7 @@ gulp.task('content_scripts', function () {
           {
             test: /\.js$/,
             loader: 'babel-loader',
-            exclude: /node_modules/
+            exclude: /node_modules/,
           }
         ]
       },

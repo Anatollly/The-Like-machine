@@ -111,6 +111,7 @@ class ElementData {
       return this.imageElement.src;
     } catch (e) {
       console.log('no image src');
+      return null;
     }
   }
 
