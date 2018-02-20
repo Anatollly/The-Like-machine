@@ -97,7 +97,7 @@ window.onload = () => {
   const settings = document.querySelector('.lm--tab-settings');
   const favorites = document.querySelector('.lm--tab-favorites');
   const manual = document.querySelector('.lm--tab-manual');
-  const additionally = document.querySelector('.lm--tab-additionally');
+  // const additionally = document.querySelector('.lm--tab-additionally');
   const startBtn = btnGroupMain.querySelector('.lm--button-start');
   const pauseBtn = btnGroupMain.querySelector('.lm--button-pause');
   const stopBtn = btnGroupMain.querySelector('.lm--button-stop');
@@ -116,7 +116,9 @@ window.onload = () => {
     if (settingsState) {
       popupData['settingsData'] = settingsState;
       popupData['settingsElement'] = getSettingsElements(settingsState);
-      changeElementLang({ save, cancel, reset, settings, favorites, manual, additionally}, settingsState.language);
+      changeElementLang({ save, cancel, reset, settings, favorites, manual,
+        // additionally
+      }, settingsState.language);
       showSettingsElements(settingsTab, popupData.settingsElement, settingsState);
     }
     if (favoritesState) showTags(favoritesState, favoritesTab);

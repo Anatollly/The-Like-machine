@@ -164,6 +164,7 @@ window.onload = () => {
     if (account) {
       clearInterval(timerOnloadID);
       window.scrollTo(0, 0);
+      console.log('account: ', account);
       checkAccounts(account, loadAccountData);
       runSuper(account);
     }
