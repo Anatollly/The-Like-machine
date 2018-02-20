@@ -154,10 +154,10 @@ export const settigsDataSelect = (() => {
       label: scrollingSpeed,
       options: new Map([
         [2000, verySlow],
-        [1200, slow],
-        [800, average],
-        [500, fast],
-        [300, veryFast]
+        [1400, slow],
+        [1000, average],
+        [750, fast],
+        [600, veryFast]
       ])
     },
     scrollType: {
@@ -195,9 +195,9 @@ export const settigsDataSelect = (() => {
     likeDelay: {
       label: delay,
       options: new Map([
-        [250, petite],
-        [500, average],
-        [1000, large]
+        [500, petite],
+        [800, average],
+        [1200, large]
       ])
     },
     dblclickInterval: {

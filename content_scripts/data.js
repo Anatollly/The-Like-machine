@@ -6,9 +6,9 @@ export const initialState = {
   settings: {
     maxLikes: 50,
     viewElementSwitch: false,
-    scrollSpeed: 700,
+    scrollSpeed: 1000,
     scrollType: 'out-expo',
-    likeDelay: 500,
+    likeDelay: 800,
     dblclickInterval: 300,
     currentPhotoColor: 'rgba(0,128,128,0.3)',
     viewElementColor: 'rgba(0,128,128,0.3)',

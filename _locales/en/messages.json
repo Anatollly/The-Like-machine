@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "Like machine",
+    "description": "Extension for instagram"
+  },
+  "appDesc": {
+    "message": "This application helps to be popular in instagram.",
+    "description":"Convenient management, automation of processes, favorites and many other things."
+  }
+}

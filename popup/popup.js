@@ -120,7 +120,7 @@ window.onload = () => {
     }
     if (favoritesState) showTags(favoritesState, favoritesTab);
     if (error403) {
-      infoText.innerHTML = 'Инстаграм зафиксировал что вы ставите слишком много лайков. Пожалуйста, подождите минимум 2 минуты чтобы продолжить';
+      infoText.innerHTML = 'Too much activity';
     } else {
       infoText.innerHTML = '';
     }
