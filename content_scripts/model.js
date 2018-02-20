@@ -20,15 +20,21 @@ import {
   setLikeNowCounter,
   setFavorites,
   setCurrentTag,
+  setUnlimitedData,
   setInitFavoritesData,
   setInitSettingsData,
-  setInitCounterData
+  setInitCounterData,
+  setDateLikeTodayData,
+  setTodayMaxLikesData,
+  setMaxFavoritesData
 } from './data';
 
 import {
   setCounterDB,
   setFavoritesDB,
   setSettingsDB,
+  setUnlimitedDB,
+  setDateLikeTodayDB
 } from './firebase';
 
 import {
@@ -77,6 +83,24 @@ export default class Model {
     setFavoritesDB(this.account, this._state.favorites);
   }
 
+  set unlimited(unlimited) {
+    this._state = setUnlimitedData(this._state, unlimited);
+    setUnlimitedDB(this.account, this._state.unlimited);
+  }
+
+  set dateLikeToday(dateLikeToday) {
+    this._state = setDateLikeTodayData(this._state, dateLikeToday);
+    setDateLikeTodayDB(this.account, this._state.dateLikeToday);
+  }
+
+  set todayMaxLikes(todayMaxLikes) {
+    this._state = setTodayMaxLikesData(this._state, todayMaxLikes);
+  }
+
+  set maxFavorites(maxFavorites) {
+    this._state = setMaxFavoritesData(this._state, maxFavorites);
+  }
+
   set counter(data) {
     this._state = setCounterData(this._state, data);
     this._onLikeTotal(data.likeTotal);
@@ -110,10 +134,24 @@ export default class Model {
 
   setInitState() {
     if (this.data) {
-      const { settings, counter , favorites } = this.data;
+      const today = moment().format("MM-DD-YY");
+      let { settings, counter , favorites, unlimited, dateLikeToday } = this.data;
       if (settings) this._state = setInitSettingsData(this._state, settings);
       if (counter) this._state = setInitCounterData(this._state, counter);
       if (favorites) this._state = setInitFavoritesData(this._state, favorites);
+      if (typeof unlimited !== 'boolean') unlimited = this._state.unlimited;
+      this.unlimited = unlimited;
+      if (unlimited) {
+        this.todayMaxLikes = 5000;
+        this.maxFavorites = 100;
+      } else {
+        this.todayMaxLikes = 100;
+        this.maxFavorites = 3;
+      }
+      if (dateLikeToday !== today) {
+        this.dateLikeToday = today;
+        this.resetTodayCounter();
+      }
     }
     localStorage.getItem('LMOn') === 'true' ? this.switchOnLM() : this.switchOffLM();
     this._onLikeNow(0);
@@ -157,15 +195,17 @@ export default class Model {
   saveFavorites() {
     try {
       let { type, name, link } = this._state.currentTag;
-      if (type === 'photos') {
-        const userName = elementData(this._state.currentElement).userName.replace(/[.,#$\/\[\]]/g, '_');
-        const date = moment(elementData(this._state.currentElement).dateCreate).format("DD-MM-YYYY_HH:mm");
-        name = `${userName}_${date}`;
-        if (!link) link = elementData(this._state.currentElement).postLink;
+      if (Object.keys(this._state.favorites[type]).length <= this._state.maxFavorites) {
+        if (type === 'photos') {
+          const userName = elementData(this._state.currentElement).userName.replace(/[.,#$\/\[\]]/g, '_');
+          const date = moment(elementData(this._state.currentElement).dateCreate).format("DD-MM-YYYY_HH:mm");
+          name = `${userName}_${date}`;
+          if (!link) link = elementData(this._state.currentElement).postLink;
+        }
+        this._state = setFavorites(this._state, type, { [name]: link});
+        this.favorites = this._state.favorites;
+        chrome.runtime.sendMessage({ favoritesState: this._state.favorites });
       }
-      this._state = setFavorites(this._state, type, { [name]: link});
-      this.favorites = this._state.favorites;
-      chrome.runtime.sendMessage({ favoritesState: this._state.favorites });
     } catch (e) {
       console.log('save favorites fail');
     }
@@ -198,10 +238,6 @@ export default class Model {
 
   resetTodayCounter() {
     this.counter = { likeTotal: this._state.counter.likeTotal, likeToday: 0 };
-  }
-
-  resetCounterToday() {
-    this._state = setItemCounter(this._state, 'likeToday', 0);
   }
 
   onClick(element) {

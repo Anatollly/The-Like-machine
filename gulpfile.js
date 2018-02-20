@@ -97,6 +97,12 @@ gulp.task('images', function() {
     .pipe(gulp.dest('build/images/'));
 });
 
+gulp.task('locales', function() {
+  return gulp.src('_locales/**/*.*', {since: gulp.lastRun('locales')})
+    .pipe(newer('build/_locales/'))
+    .pipe(gulp.dest('build/_locales/'));
+});
+
 gulp.task('manifest', function() {
   return gulp.src('manifest.json', {since: gulp.lastRun('manifest')})
     .pipe(gulp.dest('build/'));
@@ -114,6 +120,6 @@ gulp.task('watch', function() {
 
 gulp.task('build',
   gulp.series('clean',
-    gulp.parallel('content_scripts', 'background_scripts', 'popup_scripts', 'popup_jquery', 'html', 'css', 'images', 'manifest'),
+    gulp.parallel('content_scripts', 'background_scripts', 'popup_scripts', 'popup_jquery', 'html', 'css', 'images', 'locales', 'manifest'),
     'watch')
 );

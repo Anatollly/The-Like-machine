@@ -115,8 +115,8 @@ export default class PhotoController {
       this.likePhotoTimerID = setTimeout(() => {
         this.likeCurrentElement();
         this.likePhotoTimerID = setTimeout(() => {
-          const { settings: { maxLikes }, likeNowCounter } = this.model.state;
-          likeNowCounter < maxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
+          const { settings: { maxLikes }, counter: { likeToday }, likeNowCounter, todayMaxLikes } = this.model.state;
+          likeNowCounter < maxLikes && likeToday < todayMaxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
         }, 500);
       }, likeDelay);
     }

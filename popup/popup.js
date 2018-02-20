@@ -105,13 +105,14 @@ window.onload = () => {
   const topBtn = btnGroupAdd.querySelector('.lm--button-top');
   const downloadBtn = btnGroupAdd.querySelector('.lm--button-download');
   const saveTagBtn = btnGroupAdd.querySelector('.lm--button-saveTag');
-  const zeroCounterBtn = btnGroupAdd.querySelector('.lm--button-zeroCounter');
+  // const zeroCounterBtn = btnGroupAdd.querySelector('.lm--button-zeroCounter');
   const favoritesTab = document.querySelector('.favorites-element');
   const infoText = document.querySelector('.info-text');
 
   // listening incoming messages
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { settingsState, favoritesState, error403, LMOn } = message;
+    console.log('message: ', message);
     if (settingsState) {
       popupData['settingsData'] = settingsState;
       popupData['settingsElement'] = getSettingsElements(settingsState);

@@ -4,7 +4,7 @@ export const initialState = {
     likeToday: 0
   },
   settings: {
-    maxLikes: 50,
+    maxLikes: 10,
     viewElementSwitch: false,
     scrollSpeed: 1000,
     scrollType: 'out-expo',
@@ -22,6 +22,10 @@ export const initialState = {
     accounts: {},
     photos: {}
   },
+  unlimited: false,
+  dateLikeToday: '',
+  todayMaxLikes: 100,
+  maxFavorites: 3,
   elementsData: {},
   elementsNodes: {},
   currentHaveyElementNum: 0,
@@ -189,4 +193,28 @@ export const setCurrentTag = (data, currentTag) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof currentTag !== 'object') throw new Error('Invalid data type. Arguments: "currentTag"');
   return Object.assign({}, data, { currentTag });
+};
+
+export const setUnlimitedData = (data, unlimited) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof unlimited !== 'boolean') throw new Error('Invalid data type. Arguments: "unlimited"');
+  return Object.assign({}, data, { unlimited });
+};
+
+export const setDateLikeTodayData = (data, dateLikeToday) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof dateLikeToday !== 'string') throw new Error('Invalid data type. Arguments: "dateLikeToday"');
+  return Object.assign({}, data, { dateLikeToday });
+};
+
+export const setTodayMaxLikesData = (data, todayMaxLikes) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof todayMaxLikes !== 'number') throw new Error('Invalid data type. Arguments: "todayMaxLikes"');
+  return Object.assign({}, data, { todayMaxLikes });
+};
+
+export const setMaxFavoritesData = (data, maxFavorites) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof maxFavorites !== 'number') throw new Error('Invalid data type. Arguments: "maxFavorites"');
+  return Object.assign({}, data, { maxFavorites });
 };

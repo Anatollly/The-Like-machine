@@ -3,8 +3,8 @@
 
     "name": "Like-machine",
     "description": "extension for instagram",
-    "default_locale": "en",
-    "version": "1.0",
+    "default_locale": "ru",
+    "version": "1.0.1",
     "icons": {
             "16": "images/empty_16.png",
             "32": "images/empty_32.png",

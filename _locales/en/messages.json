@@ -1,9 +1,9 @@
 {
-  "appName": {
+  "application_title": {
     "message": "Like machine",
     "description": "Extension for instagram"
   },
-  "appDesc": {
+  "application_description": {
     "message": "This application helps to be popular in instagram.",
     "description":"Convenient management, automation of processes, favorites and many other things."
   }
