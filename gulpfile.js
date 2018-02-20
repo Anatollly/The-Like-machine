@@ -14,7 +14,11 @@ gulp.task('content_scripts', function () {
       devtool: 'source-map',
       module: {
         loaders: [
-          { test: /\.js$/, loader: 'babel-loader' }
+          {
+            test: /\.js$/,
+            loader: 'babel-loader',
+            exclude: /node_modules/,
+          }
         ]
       },
       output: {
@@ -31,7 +35,11 @@ gulp.task('background_scripts', function () {
       devtool: 'source-map',
       module: {
         loaders: [
-          { test: /\.js$/, loader: 'babel-loader' }
+          {
+            test: /\.js$/,
+            loader: 'babel-loader',
+            exclude: /node_modules/
+          }
         ]
       },
       output: {
@@ -48,7 +56,11 @@ gulp.task('popup_scripts', function () {
       devtool: 'source-map',
       module: {
         loaders: [
-          { test: /\.js$/, loader: 'babel-loader' }
+          {
+            test: /\.js$/,
+            loader: 'babel-loader',
+            exclude: /node_modules/
+          }
         ]
       },
       output: {
@@ -62,8 +74,19 @@ gulp.task('clean', function() {
   return del(['build/*']);
 });
 
+gulp.task('popup_jquery', function() {
+  return gulp.src('popup/jquery-3.3.1.min.js')
+    .pipe(gulp.dest('build/popup/'));
+});
+
 gulp.task('html', function() {
   return gulp.src('popup/popup.html', {since: gulp.lastRun('html')})
+    .pipe(newer('build/popup/'))
+    .pipe(gulp.dest('build/popup/'));
+});
+
+gulp.task('css', function() {
+  return gulp.src('popup/popup.css', {since: gulp.lastRun('css')})
     .pipe(newer('build/popup/'))
     .pipe(gulp.dest('build/popup/'));
 });
@@ -84,11 +107,13 @@ gulp.task('watch', function() {
   gulp.watch('background/**/*.*', gulp.series('background_scripts'));
   gulp.watch('popup/*.js', gulp.series('popup_scripts'));
   gulp.watch('popup/*.html', gulp.series('html'));
+  gulp.watch('popup/*.css', gulp.series('css'));
   gulp.watch('images/**/*.*', gulp.series('images'));
+  gulp.watch('manifest.json', gulp.series('manifest'));
 });
 
 gulp.task('build',
   gulp.series('clean',
-    gulp.parallel('content_scripts', 'background_scripts', 'popup_scripts', 'html', 'images', 'manifest'),
+    gulp.parallel('content_scripts', 'background_scripts', 'popup_scripts', 'popup_jquery', 'html', 'css', 'images', 'manifest'),
     'watch')
 );

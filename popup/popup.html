@@ -2,22 +2,75 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="popup.css" rel="stylesheet">
     <script src="popup.js"></script>
     <title></title>
   </head>
   <body>
-    <form class="form">
-      <label for="max-likes">Maximum likes</label>
-      <input type="text" id="max-likes">
-      </br>
-      <label for="start">Start</label>
-      <input type="button" id="start">
-      </br>
-      <label for="pause">Pause</label>
-      <input type="button" id="pause">
-      </br>
-      <label for="stop">Stop</label>
-      <input type="button" id="stop">
-    </form>
+    <div class="hidden-layer"></div>
+    <div class="container-fluid buttons-area">
+      <div class="btn-group btn-group d-flex justify-content-center lm--btn-add" style="margin: 15px 0" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-secondary lm--button-on" style="z-index: 1001">On</button>
+        <button type="button" class="btn btn-secondary lm--button-top">Top</button>
+        <button type="button" class="btn btn-secondary lm--button-download">Download</button>
+        <button type="button" class="btn btn-secondary lm--button-saveTag">##</button>
+        <button type="button" class="btn btn-secondary lm--button-zeroCounter">00</button>
+      </div>
+    </div>
+    <div class="btn-group btn-group d-flex justify-content-center lm--btn-main" style="margin: 15px 0" role="group" aria-label="Basic example">
+      <button type="button" class="btn btn-secondary lm--button-start">Start</button>
+      <button type="button" class="btn btn-secondary lm--button-pause">Pause</button>
+      <button type="button" class="btn btn-secondary lm--button-stop">Stop</button>
+    </div>
+    <p class="text-justify text-center text-danger info-text" style="margin: 0"></p>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link lm--tab active lm--tab-settings" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="home" aria-selected="true">Настройки</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link lm--tab lm--tab-favorites" id="favorites-tab" data-toggle="tab" href="#favorites" role="tab" aria-controls="profile" aria-selected="false">Избранное</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link lm--tab lm--tab-manual" id="manual-tab" data-toggle="tab" href="#manual" role="tab" aria-controls="contact" aria-selected="false">Инструкции</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link lm--tab lm--tab-additionally" id="additionally-tab" data-toggle="tab" href="#additionally" role="tab" aria-controls="contact" aria-selected="false">Дополнительно</a>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+        <div class="d-flex justify-content-end" style="margin-right: 5px">
+          <button type="button" class="btn btn-primary lm-button lm--button-save">Сохранить</button>
+          <button type="button" class="btn btn-primary lm-button lm--button-cancel">Отменить</button>
+          <button type="button" class="btn btn-primary lm-button lm--button-reset">Сбросить</button>
+        </div>
+        <div class="settings-element">
+        </div>
+      </div>
+      <div class="tab-pane fade" id="favorites" role="tabpanel" aria-labelledby="favorites-tab">
+        <ul class="nav nav-pills mb-3 d-flex justify-content-end" id="pills-tab" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link lm--pillow active" id="pills-locations-tab" data-toggle="pill" href="#pills-locations" role="tab" aria-controls="pills-locations" aria-selected="true">Locations</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link lm--pillow" id="pills-tags-tab" data-toggle="pill" href="#pills-tags" role="tab" aria-controls="pills-tags" aria-selected="false">Tags</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link lm--pillow" id="pills-accounts-tab" data-toggle="pill" href="#pills-accounts" role="tab" aria-controls="pills-accounts" aria-selected="false">Accounts</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link lm--pillow" id="pills-photos-tab" data-toggle="pill" href="#pills-photos" role="tab" aria-controls="pills-photos" aria-selected="false">Photos</a>
+          </li>
+        </ul>
+        <div class="tab-content favorites-element" id="pills-tabContent">
+        </div>
+      </div>
+      <div class="tab-pane fade" id="manual" role="tabpanel" aria-labelledby="manual-tab">...</div>
+      <div class="tab-pane fade" id="additionally" role="tabpanel" aria-labelledby="additionally-tab">...</div>
+    </div>
+    <script src="jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   </body>
 </html>

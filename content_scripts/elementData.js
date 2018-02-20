@@ -10,12 +10,15 @@ class ElementData {
     this._timeElement = null;
   }
 
+  get profile() {
+    try {
+      return document.querySelector('.coreSpriteDesktopNavProfile').href;
+    } catch (e) {
+    }
+  }
+
   get heartElement() {
-    return (
-      this.element.querySelector('.coreSpriteHeartOpen')
-      || this.element.querySelector('.coreSpriteHeartFull')
-      || null
-    );
+    return this.element.querySelector('.coreSpriteHeartOpen') || this.element.querySelector('.coreSpriteHeartFull');
   }
 
   get heartFull() {
@@ -23,15 +26,11 @@ class ElementData {
   }
 
   get commentElement() {
-    return this.element.querySelector('.coreSpriteComment') || null;
+    return this.element.querySelector('.coreSpriteComment');
   }
 
   get saveElement() {
-    return (
-      this.element.querySelector('.coreSpriteSaveOpen')
-      || this.element.querySelector('.coreSpriteSaveFull')
-      || null
-    );
+    return this.element.querySelector('.coreSpriteSaveOpen') || this.element.querySelector('.coreSpriteSaveFull');
   }
 
   get saveFull() {
@@ -39,11 +38,11 @@ class ElementData {
   }
 
   get textareaElement() {
-    return this.element.querySelector('._b6i0l textarea') || null;
+    return this.element.querySelector('._b6i0l textarea');
   }
 
   get userElement() {
-    if (!this._userElement) this._userElement = this.element.querySelector('._2g7d5') || null;
+    if (!this._userElement) this._userElement = this.element.querySelector('._2g7d5');
     return this._userElement;
   }
 
@@ -51,16 +50,18 @@ class ElementData {
     try {
       return this.userElement.innerHTML;
     } catch (e) {
-      console.log('No name');
     }
   }
 
   get userLink() {
-    return this.userElement.href || null;
+    try {
+      return this.userElement.href;
+    } catch (e) {
+    }
   }
 
   get locationElement() {
-    if (!this._locationElement) this._locationElement = this.element.querySelector('._q8ysx') || null;
+    if (!this._locationElement) this._locationElement = this.element.querySelector('._q8ysx');
     return this._locationElement;
   }
 
@@ -68,7 +69,6 @@ class ElementData {
     try {
       return this.locationElement.innerHTML;
     } catch (e) {
-      console.log('No location');
     }
   }
 
@@ -76,34 +76,40 @@ class ElementData {
     try {
       return this.locationElement.href;
     } catch (e) {
-      console.log('No location link');
     }
   }
 
   get wrapImgElement() {
     if (!this._wrapImgElement) {
-      this._wrapImgElement = this.element.querySelector('._4rbun')
-      || this.element.querySelector('._qzesf')
-      || null;
+      this._wrapImgElement = this.element.querySelector('._4rbun') || this.element.querySelector('._qzesf');
     }
     return this._wrapImgElement;
   }
 
   get imageElement() {
     if (!this._imageElement) {
-      this._imageElement = this.wrapImgElement.querySelector('img')
-      || this.wrapImgElement.querySelector('video')
-      || null;
+      this._imageElement = this.wrapImgElement.querySelector('img') || this.wrapImgElement.querySelector('video');
     }
     return this._imageElement;
   }
 
   get description() {
-    return this.imageElement.alt || '';
+    try {
+      return this.imageElement.alt;
+    } catch (e) {
+    }
+  }
+
+  get imageSrc() {
+    try {
+      return this.imageElement.src;
+    } catch (e) {
+      return null;
+    }
   }
 
   get dblclickImageElement() {
-    return this.element.querySelector('._si7dy') || null;
+    return this.element.querySelector('._si7dy');
   }
 
   get timeElement() {
@@ -112,11 +118,17 @@ class ElementData {
   }
 
   get postLink() {
-    return parse(this.timeElement.href, true).pathname || null;
+    try {
+      return parse(this.timeElement.href, true).pathname;
+    } catch (e) {
+    }
   }
 
   get dateCreate() {
-    return this.timeElement.querySelector('time').dateTime || 0;
+    try {
+      return this.timeElement.querySelector('time').dateTime || 0;
+    } catch (e) {
+    }
   }
 
   get dateView() {
@@ -131,6 +143,18 @@ class ElementData {
     return document.querySelector('._pfyik .coreSpriteLeftPaginationArrow');
   }
 
+  get rightChevron() {
+    return this.element.querySelector('a.coreSpriteRightChevron');
+  }
+
+  get leftChevron() {
+    return this.element.querySelector('a.coreSpriteLeftChevron');
+  }
+
+  get playElement() {
+    return this.element.querySelector('a.videoSpritePlayButton');
+  }
+
   get elementData() {
     const {
       userName,
@@ -142,7 +166,8 @@ class ElementData {
       saveFull,
       postLink,
       dateCreate,
-      dateView
+      dateView,
+      imageSrc
     } = this;
 
     return {
@@ -155,7 +180,8 @@ class ElementData {
       saveFull,
       postLink,
       dateCreate,
-      dateView
+      dateView,
+      imageSrc
     };
   }
 
@@ -164,22 +190,22 @@ class ElementData {
       element,
       heartElement,
       commentElement,
-      saveElement,
       textareaElement,
       imageElement,
       wrapImgElement,
-      dblclickImageElement
+      dblclickImageElement,
+      imageSrc
     } = this;
 
     return {
       element,
       heartElement,
       commentElement,
-      saveElement,
       textareaElement,
       imageElement,
       wrapImgElement,
-      dblclickImageElement
+      dblclickImageElement,
+      imageSrc
     };
   }
 

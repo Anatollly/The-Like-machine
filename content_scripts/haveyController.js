@@ -1,6 +1,7 @@
 import elementData from './elementData';
 
 import scrollToEl from 'scroll-to-element';
+//import ScrollEvents from 'scroll-events';
 
 export default class HaveyController {
   constructor(model) {
@@ -13,11 +14,6 @@ export default class HaveyController {
     this.firstElementCount = 0;
     this.lastElementCount = 3;
     this.model = model;
-    this.scrollSettings = {
-      offset: -52,
-      ease: 'out-expo',
-      duration: 700
-    };
   }
 
   get haveyElement() {
@@ -39,6 +35,15 @@ export default class HaveyController {
     return elementsNodes[currentHaveyElementNum + 1];
   }
 
+  get scrollSettings() {
+    const { scrollSpeed, scrollType } = this.model.state.settings;
+    return {
+      offset: -52,
+      ease: scrollType,
+      duration: scrollSpeed
+    }
+  }
+
   setNumElement(element, num) {
     element.dataset.numberElement = num;
   }
@@ -46,11 +51,17 @@ export default class HaveyController {
   numberingElements(callback) {
     const { haveyElement } = this;
     const elements = haveyElement.querySelectorAll('article');
+    let currentElement = false;
     elements.forEach((item, i) => {
       this.setNumElement(item, i);
       this.lastElementCount = i;
       this.model.addElNodes(item, i);
       this.addListElement(item);
+      const top = item.getBoundingClientRect().top;
+      if (top > -300 && !currentElement) {
+        this.model.currentHaveyElementNum = i;
+        currentElement = true;
+      }
       if (elements.length - 1 === i) callback();
     })
   }
@@ -76,24 +87,32 @@ export default class HaveyController {
   }
 
   onInsertElement(e) {
-    const { target, relatedNode } = e;
-    if (target.tagName === 'ARTICLE') {
-      const childNodes = e.relatedNode.childNodes;
-      const lastChildNumberElement = childNodes[childNodes.length - 2].dataset.numberElement * 1;
-      const firstChildNumberElement = childNodes[1].dataset.numberElement * 1;
-      if (relatedNode.lastChild === target) this.addLastElement(target, lastChildNumberElement);
-      if (relatedNode.firstChild === target) this.addFirstElement(target, firstChildNumberElement);
+    try {
+      const { target, relatedNode } = e;
+      if (target.tagName === 'ARTICLE') {
+        const childNodes = e.relatedNode.childNodes;
+        const lastChildNumberElement = childNodes[childNodes.length - 2].dataset.numberElement * 1;
+        const firstChildNumberElement = childNodes[1].dataset.numberElement * 1;
+        if (relatedNode.lastChild === target) this.addLastElement(target, lastChildNumberElement);
+        if (relatedNode.firstChild === target) this.addFirstElement(target, firstChildNumberElement);
+      }
+    } catch (e) {
+      this.restartController();
     }
   }
 
   onRemoveElement(e) {
-    const { target, relatedNode } = e;
-    if (target.tagName === 'ARTICLE') {
-      const numberElement = target.dataset.numberElement * 1;
-      const lastChildNumberElement = relatedNode.lastChild.dataset.numberElement * 1;
-      const firstChildNumberElement = relatedNode.firstChild.dataset.numberElement * 1;
-      if (lastChildNumberElement === numberElement) this.removeLastElement(target, lastChildNumberElement);
-      if (firstChildNumberElement === numberElement) this.removeFirstElement(target, firstChildNumberElement);
+    try {
+      const { target, relatedNode } = e;
+      if (target.tagName === 'ARTICLE') {
+        const numberElement = target.dataset.numberElement * 1;
+        const lastChildNumberElement = relatedNode.lastChild.dataset.numberElement * 1;
+        const firstChildNumberElement = relatedNode.firstChild.dataset.numberElement * 1;
+        if (lastChildNumberElement === numberElement) this.removeLastElement(target, lastChildNumberElement);
+        if (firstChildNumberElement === numberElement) this.removeFirstElement(target, firstChildNumberElement);
+      }
+    } catch (e) {
+      this.restartController();
     }
   }
 
@@ -151,21 +170,25 @@ export default class HaveyController {
   }
 
   setCurrentElement() {
-    const { currentHaveyElementNum, elementsNodes } = this.model.state;
-    const heightLine = this.windowHeight / 2;
-    const nextElement = this.nextNodes && this.nextNodes.element;
-    const topHeightNextElement = nextElement && nextElement.getBoundingClientRect().top
-    const topHeightCurrentElement = this.currentNodes.element.getBoundingClientRect().top;
-    if (heightLine > topHeightNextElement) this.model.currentHaveyElementNum = currentHaveyElementNum + 1;
-    if (heightLine < topHeightCurrentElement) this.model.currentHaveyElementNum = currentHaveyElementNum  - 1;
+    try {
+      const { currentHaveyElementNum, elementsNodes } = this.model.state;
+      const heightLine = this.windowHeight / 2;
+      const nextElement = this.nextNodes && this.nextNodes.element;
+      const topHeightNextElement = nextElement && nextElement.getBoundingClientRect().top
+      const topHeightCurrentElement = this.currentNodes.element.getBoundingClientRect().top;
+      if (heightLine > topHeightNextElement) this.model.currentHaveyElementNum = currentHaveyElementNum + 1;
+      if (heightLine < topHeightCurrentElement) this.model.currentHaveyElementNum = currentHaveyElementNum  - 1;
+    } catch (e) {
+      this.restartController();
+    }
   }
 
   scrollToElement(element, callback) {
     scrollToEl(element, this.scrollSettings);
     let height = -1;
-    const scrollID = setInterval(() => {
+    this.scrollID = setInterval(() => {
       if (height === this.height) {
-        clearInterval(scrollID);
+        clearInterval(this.scrollID);
         callback && callback();
       } else {
         height = this.height;
@@ -173,17 +196,8 @@ export default class HaveyController {
     }, 50)
   }
 
-  // scrollToUnlikeElement(callback) {
-  //   const element = this.currentNodes.element;
-  //   if (elementData(element).heartFull) { // like
-  //     this.scrollToElement(this.nextNodes.element, this.scrollToUnlikeElement);
-  //   } else {
-  //     this.scrollToElement(element, this.likeCurrentElemen);
-  //   }
-  // }
-
   likeElement(elementNodes) {
-    const image = elementNodes.dblclickImageElement;
+    const image = elementData(elementNodes.element).dblclickImageElement;
     const heart = elementNodes.heartElement;
     image ? image.dispatchEvent(new MouseEvent('dblclick', {'bubbles': true})) : heart.click();
   }
@@ -204,38 +218,44 @@ export default class HaveyController {
     !heartFull && this.likeElement(currentNodes);
   }
 
-  likeNextElement() {
+  goToNextElement(callback) {
     const { nextNodes } = this;
-    nextNodes && this.scrollToElement(nextNodes.element, this.likeCurrentElement.bind(this));
+    if (nextNodes) {
+      this.scrollToElement(nextNodes.element, callback);
+    } else {
+      this.stopLM();
+    }
   }
 
   onStartLM() {
-    this.likeCurrentElement();
-    this.scrollTimerID = setInterval(() => {
-      const { maxLikes, likeNowCounter } = this.model.state;
-      likeNowCounter < maxLikes ? this.likeNextElement() : this.stopLM();
-      // likeNowCounter < maxLikes ? this.scrollToUnlikeElement() : this.stopLM();
-    }, 1000);
+    const likeDelay = this.model.state.settings.likeDelay;
+    if (this.play) {
+      this.likeCurrentElement();
+      this.likePhotoTimerID = setTimeout(() => {
+        const { settings: { maxLikes }, likeNowCounter } = this.model.state;
+        likeNowCounter < maxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
+      }, likeDelay);
+    }
   }
 
   startLM() {
     if (!this.play) {
       this.play = true;
-      this.removeListSpace();
+      this.ignoreKeyboard();
       this.onStartLM();
     }
   }
 
   pauseLM() {
     this.play = false;
-    clearTimeout(this.scrollTimerID);
-    this.addListSpace();
+    clearTimeout(this.likePhotoTimerID);
+    this.addListKeyboard();
   }
 
   stopLM() {
     this.play = false;
-    clearTimeout(this.scrollTimerID);
-    this.addListSpace();
+    clearTimeout(this.likePhotoTimerID);
+    this.addListKeyboard();
     this.model.resetLikeNowCounter();
   }
 
@@ -243,22 +263,46 @@ export default class HaveyController {
     const { currentNodes, nextNodes } = this;
     const topCurrentElement = currentNodes.element.getBoundingClientRect().top;
     if (topCurrentElement < 50 || topCurrentElement > 100) {
-      this.scrollToElement(currentNodes.element, () => {console.log('stop current')});
+      scrollToEl(currentNodes.element, this.scrollSettings);
     } else {
-      nextNodes && this.scrollToElement(nextNodes.element, () => {console.log('stop next')});
+      nextNodes && scrollToEl(nextNodes.element, this.scrollSettings);
     }
   }
 
   onClickUp(e) {
     const { currentNodes, prevNodes } = this;
     const topCurrentElement = currentNodes.element.getBoundingClientRect().top;
-    prevNodes && this.scrollToElement(prevNodes.element, () => {console.log('stop prev')});
+    prevNodes && scrollToEl(prevNodes.element, this.scrollSettings);
   }
 
   onClickDown(e) {
     const { currentNodes, nextNodes } = this;
     const topCurrentElement = currentNodes.element.getBoundingClientRect().top;
-    nextNodes && this.scrollToElement(nextNodes.element, () => {console.log('stop prev')});
+    nextNodes && scrollToEl(nextNodes.element, this.scrollSettings);
+  }
+
+  onClickRight(e) {
+    try {
+      elementData(this.currentNodes.element).rightChevron.click();
+    } catch (e) {
+      // console.log('no right chevron');
+    }
+  }
+
+  onClickLeft(e) {
+    try {
+      elementData(this.currentNodes.element).leftChevron.click();
+    } catch (e) {
+      // console.log('no left chevron');
+    }
+  }
+
+  onClickEnter(e) {
+    try {
+      elementData(this.currentNodes.element).playElement.click();
+    } catch (e) {
+      // console.log('no play element');
+    }
   }
 
   onDblclickSpace(e) {
@@ -266,42 +310,54 @@ export default class HaveyController {
   }
 
   onSpace(e) {
-    if (e.keyCode === 32 && e.target == document.body) {
-      e.preventDefault();
-      if (this.spaceInterval) {
-        clearTimeout(this.timerSpaceID);
+    const { dblclickInterval } = this.model.state.settings;
+    e.preventDefault();
+    if (this.spaceInterval) {
+      clearTimeout(this.timerSpaceID);
+      this.spaceInterval = false;
+      this.onDblclickSpace(e);
+    } else {
+      this.spaceInterval = true;
+      this.timerSpaceID = setTimeout(() => {
         this.spaceInterval = false;
-        this.onDblclickSpace(e);
-      } else {
-        this.spaceInterval = true;
-        this.timerSpaceID = setTimeout(() => {
-          this.spaceInterval = false;
-          this.onClickSpace(e);
-        }, 300);
-      }
+        this.onClickSpace(e);
+      }, dblclickInterval);
     }
   }
 
-  onArrows(e) {
-    if (e.keyCode === 40 && e.target == document.body) {
-      e.preventDefault();
-      this.onClickDown(e);
-    }
-    if (e.keyCode === 38 && e.target == document.body) {
-      e.preventDefault();
-      this.onClickUp(e);
+  onKeyboard(e) {
+    switch (e.keyCode) {
+      case 32:
+        this.onSpace(e);
+        break;
+      case 40:
+        this.onClickDown(e);
+        break;
+      case 38:
+        this.onClickUp(e);
+        break;
+      case 39:
+        this.onClickRight(e);
+        break;
+      case 37:
+        this.onClickLeft(e);
+        break;
+      case 13:
+        this.onClickEnter(e);
+        break;
     }
   }
 
-  addListSpace() {
-    window.onkeypress = this.onSpace.bind(this);
-    window.onkeydown = this.onArrows.bind(this);
+  addListKeyboard() {
+    window.onkeydown = this.onKeyboard.bind(this);
   }
 
-  removeListSpace() {
-    window.onkeypress = (e) => {
-      if (e.keyCode == 32 && e.target == document.body) e.preventDefault();
-    }
+  ignoreKeyboard() {
+    window.onkeydown = e => e.preventDefault();
+  }
+
+  removeListKeyboard() {
+    window.onkeydown = null;
   }
 
   setHeightScroll() {
@@ -310,24 +366,32 @@ export default class HaveyController {
     this.bottom = height + delta;
   }
 
-  collectDataStart() {
-    this.model.setInitState();
-    this.numberingElements(() => {
-      this.addListInsertElement();
-      this.addListRemoveElement();
-      this.model.currentHaveyElementNum = 0;
-    });
-
-    window.onscroll = () => {
-      this.height = window.pageYOffset;
-      if (this.height > this.bottom || this.height < this.top) {
-        this.setHeightScroll();
-        this.setCurrentElement();
-      }
+  startController() {
+    try {
+      this.haveyTimerID = setInterval(() => {
+        if (this.haveyElement && this.haveyElement.querySelectorAll('article').length > 3) {
+          clearInterval(this.haveyTimerID);
+          this.numberingElements(() => {
+            this.addListInsertElement();
+            this.addListRemoveElement();
+          });
+          window.onscroll = () => {
+            this.height = window.pageYOffset;
+            if (this.height > this.bottom || this.height < this.top) {
+              this.setHeightScroll();
+              this.setCurrentElement();
+            }
+          }
+          this.addListKeyboard();
+        }
+      }, 300);
+    } catch (e) {
+      this.stopController();
+      console.log('start havey controller fail');
     }
   }
 
-  collectDataStop() {
+  stopController() {
     window.onscroll = () => {};
     this.removeListInsertElement();
     this.removeListRemoveElement();
@@ -337,5 +401,24 @@ export default class HaveyController {
         this.removeListElement(elementsNodes[item].element);
       })
     }
+    this.removeListKeyboard();
+    clearTimeout(this.likePhotoTimerID);
+    clearInterval(this.scrollID);
+    clearTimeout(this.timerSpaceID);
+    clearInterval(this.haveyTimerID);
   }
+
+  restartController() {
+    this.stopController();
+      let height = this.height;
+      this.scrollID = setInterval(() => {
+        if (height === this.height) {
+          clearInterval(this.scrollID);
+          this.startController();
+        } else {
+          height = this.height;
+        }
+      }, 50)
+  }
+
 }

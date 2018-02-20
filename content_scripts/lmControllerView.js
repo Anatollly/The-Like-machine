@@ -3,11 +3,7 @@ export default class LmControllerView {
     this.head = document.querySelector('head');
     this.style = document.createElement('style');
     this.body = document.querySelector('body');
-    this.switchController = controller;
-  }
-
-  get controller() {
-    return this.switchController.controller;
+    this.model = controller.model;
   }
 
   get element() {
@@ -28,98 +24,109 @@ export default class LmControllerView {
 
 
   getMarkup() {
-    const { likeNowCounter, counter: { likeTotal, likeToday } } = this.controller.model.state;
-    return `
+    return (`
       <div class="lm--count">
         <div class="lm--count-item lm--count-total">
           <p class="lm--count-name">Total:</p>
-          <div class="lm--count-num">${likeTotal}</div>
-          <div class="lm--count-heart"></div>
+          <div class="lm--count-numHeart">
+            <div class="lm--count-num"></div>
+            <div class="lm--count-heart"></div>
+          </div>
         </div>
         <div class="lm--count-item lm--count-today">
           <p class="lm--count-name">Today:</p>
-          <div class="lm--count-num">${likeToday}</div>
-          <div class="lm--count-heart"></div>
+          <div class="lm--count-numHeart">
+            <div class="lm--count-num"></div>
+            <div class="lm--count-heart"></div>
+          </div>
         </div>
         <div class="lm--count-item lm--count-now">
           <p class="lm--count-name">Now:</p>
-          <div class="lm--count-num">${likeNowCounter}</div>
-          <div class="lm--count-heart"></div>
+          <div class="lm--count-numHeart">
+            <div class="lm--count-num"></div>
+            <div class="lm--count-heart"></div>
+          </div>
         </div>
       </div>
-      <form class="lm--form">
-        <label for="lm--maxLikes">Maximum likes</label>
-        <input type="text" id="lm--maxLikes">
-        </br>
-        <label for="lm--start">Start</label>
-        <input type="button" id="lm--start">
-        </br>
-        <label for="lm--pause">Pause</label>
-        <input type="button" id="lm--pause">
-        </br>
-        <label for="lm--stop">Stop</label>
-        <input type="button" id="lm--stop">
-      </form>
-    `;
+      `);
   }
 
   getStyle() {
     return `
       .lm--element {
+        font-size: 20px;
+        line-height: 24px;
         position: fixed;
-        width: 100px;
-        height: 166px;
-        right: 50px;
-        bottom: 50px;
+        width: 180px;
+        height: 130px;
         z-index: 1000000;
-        background-color: rgba(100, 100, 100, 0.3);
-    }
+        padding: 10px;
+        border: 1px solid rgba(0,0,0,0.5);
+        border-radius: 10px;
+      }
+      .lm--count-item {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin: 10px 0;
+      }
+      .lm--count-heart {
+        background-position: -100px -351px;
+        background-image: url(/static/bundles/sprite_core_2x.png/9e7638226e17.png);
+        background-size: 429px 398px;
+        height: 24px;
+        width: 24px;
+        margin: 0 0 0 5px;
+      }
+      .lm--count-numHeart {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+      }
     `;
   }
 
   bindHandlers() {
-    const { element, haveyLikeFunc } = this;
-    const maxLikes = element.querySelector('#lm--maxLikes');
-    maxLikes.value = this.controller.model.state.maxLikes;
-    maxLikes.addEventListener('input', () => {
-      this.controller.model.maxLikes = maxLikes.value * 1;
-    });
-    element.querySelector('#lm--start').addEventListener('click', () => {
-      this.controller.startLM();
-    });
-    element.querySelector('#lm--pause').addEventListener('click', () => {
-      this.controller.pauseLM();
-    });
-    element.querySelector('#lm--stop').addEventListener('click', () => {
-      this.controller.stopLM();
-    });
-    this._totalElement = element.querySelector('.lm--count-total .lm--count-num');
-    this._todayElement = element.querySelector('.lm--count-today .lm--count-num');
-    this._nowElement = element.querySelector('.lm--count-now .lm--count-num');
-    this.controller.model.onLikeTotal = this.setTotalLikes.bind(this);
-    this.controller.model.onLikeToday = this.setTodayLikes.bind(this);
-    this.controller.model.onLikeNow = this.setNowLikes.bind(this);
+    const { element } = this;
+    this._totalElement = element.querySelector('.lm--count-total');
+    this._todayElement = element.querySelector('.lm--count-today');
+    this._nowElement = element.querySelector('.lm--count-now');
+    this._totalCounter = element.querySelector('.lm--count-total .lm--count-num');
+    this._todayCounter = element.querySelector('.lm--count-today .lm--count-num');
+    this._nowCounter = element.querySelector('.lm--count-now .lm--count-num');
+    this.model.onLikeTotal = this.setTotalLikes.bind(this);
+    this.model.onLikeToday = this.setTodayLikes.bind(this);
+    this.model.onLikeNow = this.setNowLikes.bind(this);
+    this.model.onViewElementSwitch = this.setViewElementSwitch.bind(this);
+    this.model.onStyleViewElement = this.setStyleViewElement.bind(this);
   }
 
   setTotalLikes(num) {
-    this._totalElement.innerHTML = num;
+    this._totalCounter.innerHTML = num;
   }
 
   setTodayLikes(num) {
-    this._todayElement.innerHTML = num;
+    this._todayCounter.innerHTML = num;
   }
 
   setNowLikes(num) {
-    this._nowElement.innerHTML = num;
+    this._nowCounter.innerHTML = num;
+  }
+
+  setViewElementSwitch(bool) {
+    bool ? this.showElement() : this.hiddenElement();
+  }
+
+  setStyleViewElement(color, position) {
+    this._element.style = `background-color: ${color}; ${position} `;
   }
 
   addElement() {
-    const { machineSwitch, head, style, body, element, haveyLikeFunc } = this;
+    const { head, style, body, element } = this;
     style.type = 'text/css';
     style.innerHTML = this.getStyle();
     head.appendChild(style);
     element.classList.add('lm--element');
-    machineSwitch ? this.showElement() : this.hiddenElement();
     body.appendChild(element);
   }
 

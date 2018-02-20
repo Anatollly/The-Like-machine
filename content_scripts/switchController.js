@@ -1,13 +1,16 @@
 import HaveyController from './haveyController';
-import ExplorerController from './explorerController';
+import PhotoController from './photoController';
+import ExploreController from './exploreController';
 import Model from './model';
 
-class SwitchController {
-  constructor(data) {
+export default class SwitchController {
+  constructor(data, account) {
     this.data = data;
-    this.model = new Model(this.data);
+    this.account = account;
+    this.model = new Model(this.data, this.account);
     this.haveyController = new HaveyController(this.model);
-    this.explorerController = new ExplorerController(this.model);
+    this.photoController = new PhotoController(this.model);
+    this.exploreController = new ExploreController(this.model);
   }
 
   get controller() {
@@ -18,8 +21,13 @@ class SwitchController {
     if(this._controller !== this.haveyController) this.switchToHaveyController();
   }
 
-  onSwitchExplorer() {
-    if (this._controller !== this.explorerController) this.switchToExplorerController();
+  onSwitchPhoto(postName) {
+    if(this._controller !== this.photoController) this.switchToPhotoController();
+    this.photoController.openPost(postName);
+  }
+
+  onSwitchExplore() {
+    if(this._controller !== this.exploreController) this.switchToExploreController();
   }
 
   onSwitchOff() {
@@ -27,28 +35,26 @@ class SwitchController {
   }
 
   switchToHaveyController() {
-    console.log('switch havey');
     this._controller = this.haveyController;
-    this.explorerController.removeListInsertElement();
-    this.haveyController.addListSpace();
-    this.haveyController.collectDataStart();
+    this.haveyController.startController();
+    this.photoController.stopController();
   }
 
-  switchToExplorerController() {
-    console.log('switch explorer');
-    this._controller = this.explorerController;
-    this.explorerController.addListInsertElement();
-    this.haveyController.removeListSpace();
-    this.haveyController.collectDataStop();
+  switchToPhotoController() {
+    this._controller = this.photoController;
+    this.photoController.startController();
+    this.haveyController.stopController();
+  }
+
+  switchToExploreController() {
+    this._controller = this.exploreController;
+    this.haveyController.stopController();
+    this.photoController.stopController();
   }
 
   switchOffController() {
-    console.log('switch off');
     this._controller = null;
-    this.explorerController.removeListInsertElement();
-    this.haveyController.removeListSpace();
-    this.haveyController.collectDataStop();
+    this.haveyController.stopController();
+    this.photoController.stopController();
   }
 }
-
-export default (data) => new SwitchController(data);
