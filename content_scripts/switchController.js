@@ -1,13 +1,16 @@
 import HaveyController from './haveyController';
-import ExplorerController from './explorerController';
+import PhotoController from './photoController';
+import ExploreController from './exploreController';
 import Model from './model';
 
 export default class SwitchController {
-  constructor(data) {
+  constructor(data, account) {
     this.data = data;
-    this.model = new Model(this.data);
+    this.account = account;
+    this.model = new Model(this.data, this.account);
     this.haveyController = new HaveyController(this.model);
-    this.explorerController = new ExplorerController(this.model);
+    this.photoController = new PhotoController(this.model);
+    this.exploreController = new ExploreController(this.model);
   }
 
   get controller() {
@@ -18,9 +21,13 @@ export default class SwitchController {
     if(this._controller !== this.haveyController) this.switchToHaveyController();
   }
 
-  onSwitchExplorer(postName) {
-    if(this._controller !== this.explorerController) this.switchToExplorerController();
-    this.explorerController.openPost(postName);
+  onSwitchPhoto(postName) {
+    if(this._controller !== this.photoController) this.switchToPhotoController();
+    this.photoController.openPost(postName);
+  }
+
+  onSwitchExplore() {
+    if(this._controller !== this.exploreController) this.switchToExploreController();
   }
 
   onSwitchOff() {
@@ -30,20 +37,24 @@ export default class SwitchController {
   switchToHaveyController() {
     this._controller = this.haveyController;
     this.haveyController.startController();
-    this.explorerController.stopController();
+    this.photoController.stopController();
   }
 
-  switchToExplorerController() {
-    this._controller = this.explorerController;
-    this.explorerController.startController();
+  switchToPhotoController() {
+    this._controller = this.photoController;
+    this.photoController.startController();
     this.haveyController.stopController();
+  }
+
+  switchToExploreController() {
+    this._controller = this.exploreController;
+    this.haveyController.stopController();
+    this.photoController.stopController();
   }
 
   switchOffController() {
     this._controller = null;
     this.haveyController.stopController();
-    this.explorerController.stopController();
+    this.photoController.stopController();
   }
 }
-
-// export default (data) => new SwitchController(data);

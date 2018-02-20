@@ -1,6 +1,6 @@
 import { languageMap } from './data';
 
-class AbstractFavoritesLinkView {
+class FavoritesLinkView {
   constructor(data, index) {
     this.data = data;
     this.index = index;
@@ -15,15 +15,13 @@ class AbstractFavoritesLinkView {
   }
 
   getMarkup() {
-    console.log('getMarkup index : ', this.index);
     // const numLang = languageMap[lang];
     let tabContent = '';
     Object.keys(this.data).forEach((itemTab, iTab) => {
-      console.log('itab index: ', iTab, this.index);
       let btnContent = '';
       Object.keys(this.data[itemTab]).forEach((itemBtn, iBtn) => {
         btnContent += `
-          <a href="https://www.instagram.com${this.data[itemTab][itemBtn]}" class="btn btn-info btn-sm active lm--favorites-link" role="button" aria-pressed="true" data-type="link">${itemTab === 'tags' ? "#" : ""}${itemBtn}</a>
+          <a href="https://www.instagram.com${this.data[itemTab][itemBtn]}" class="btn btn-info btn-sm active lm--favorites-link" style="text-align: left" role="button" aria-pressed="true" data-type="link">${itemTab === 'tags' ? "#" : ""}${decodeURI(itemBtn)}</a>
           <a href="#" class="btn btn-danger btn-sm active lm--favorites-delete" role="button" aria-pressed="true" data-type="delete" data-tab="${itemTab}" data-item="${itemBtn}">Delete</a>
         `
       })
@@ -44,4 +42,4 @@ class AbstractFavoritesLinkView {
   }
 }
 
-export default (data, index) => new AbstractFavoritesLinkView(data, index).element;
+export default (data, index) => new FavoritesLinkView(data, index).element;

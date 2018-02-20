@@ -1,6 +1,6 @@
 import elementData from './elementData';
 
-export default class ExplorerController {
+export default class PhotoController {
   constructor(model) {
     this.model = model;
   }
@@ -40,6 +40,7 @@ export default class ExplorerController {
             this.leftArrow = elementData(this.currentNodes.element).leftArrow;
             this.onOpenPost && this.onOpenPost(postName);
             this.openingPost = false;
+            if (this.model.state.playPhoto) this.startLM();
           }
         }, 200);
       } catch (e) {
@@ -109,13 +110,12 @@ export default class ExplorerController {
   }
 
   onStartLM() {
-    const likeDelay = this.model.state.profileData.likeDelay;
+    const likeDelay = this.model.state.settings.likeDelay;
     if (this.play) {
       this.likePhotoTimerID = setTimeout(() => {
         this.likeCurrentElement();
         this.likePhotoTimerID = setTimeout(() => {
-          const { profileData: { maxLikes }, likeNowCounter } = this.model.state;
-          console.log('start: ', maxLikes, likeNowCounter);
+          const { settings: { maxLikes }, likeNowCounter } = this.model.state;
           likeNowCounter < maxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
         }, 500);
       }, likeDelay);
@@ -127,6 +127,7 @@ export default class ExplorerController {
       this.play = true;
       this.onStartLM();
       this.ignoreKeyboard();
+      this.model.playPhoto = false;
     }
   }
 
@@ -147,7 +148,7 @@ export default class ExplorerController {
     try {
       this.rightArrow.click();
     } catch (e) {
-      console.log('no right arrow');
+      // console.log('no right arrow');
     }
   }
 
@@ -155,7 +156,7 @@ export default class ExplorerController {
     try {
       elementData(this.currentNodes.element).rightChevron.click();
     } catch (e) {
-      console.log('no right chevron');
+      // console.log('no right chevron');
     }
   }
 
@@ -163,7 +164,7 @@ export default class ExplorerController {
     try {
       elementData(this.currentNodes.element).leftChevron.click();
     } catch (e) {
-      console.log('no left chevron');
+      // console.log('no left chevron');
     }
   }
 
@@ -172,7 +173,7 @@ export default class ExplorerController {
     try {
       elementData(this.currentNodes.element).playElement.click();
     } catch (e) {
-      console.log('no play element');
+      // console.log('no play element');
     }
   }
 
@@ -181,7 +182,7 @@ export default class ExplorerController {
   }
 
   onSpace(e) {
-    const { dblclickInterval } = this.model.state.profileData;
+    const { dblclickInterval } = this.model.state.settings;
     e.preventDefault();
     if (this.spaceInterval) {
       clearTimeout(this.timerSpaceID);

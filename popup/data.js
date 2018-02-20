@@ -252,10 +252,10 @@ export const settigsDataSelect = (() => {
     viewElementPosition: {
       label: counterPosition,
       options: new Map([
-        ['right:50px;top:50px;', topRight],
-        ['right:50px;bottom:50px;', bottomRight],
-        ['left:50px;bottom:50px;', bottomLeft],
-        ['left:50px;top:50px;', topLeft]
+        ['right:20px;top:80px;', topRight],
+        ['right:20px;bottom:80px;', bottomRight],
+        ['left:20px;bottom:80px;', bottomLeft],
+        ['left:20px;top:80px;', topLeft]
       ])
     },
     language: {

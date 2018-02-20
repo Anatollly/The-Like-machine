@@ -36,7 +36,7 @@ export default class HaveyController {
   }
 
   get scrollSettings() {
-    const { scrollSpeed, scrollType } = this.model.state.profileData;
+    const { scrollSpeed, scrollType } = this.model.state.settings;
     return {
       offset: -52,
       ease: scrollType,
@@ -228,11 +228,11 @@ export default class HaveyController {
   }
 
   onStartLM() {
-    const likeDelay = this.model.state.profileData.likeDelay;
+    const likeDelay = this.model.state.settings.likeDelay;
     if (this.play) {
       this.likeCurrentElement();
       this.likePhotoTimerID = setTimeout(() => {
-        const { profileData: { maxLikes }, likeNowCounter } = this.model.state;
+        const { settings: { maxLikes }, likeNowCounter } = this.model.state;
         likeNowCounter < maxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
       }, likeDelay);
     }
@@ -285,7 +285,7 @@ export default class HaveyController {
     try {
       elementData(this.currentNodes.element).rightChevron.click();
     } catch (e) {
-      console.log('no right chevron');
+      // console.log('no right chevron');
     }
   }
 
@@ -293,7 +293,7 @@ export default class HaveyController {
     try {
       elementData(this.currentNodes.element).leftChevron.click();
     } catch (e) {
-      console.log('no left chevron');
+      // console.log('no left chevron');
     }
   }
 
@@ -301,7 +301,7 @@ export default class HaveyController {
     try {
       elementData(this.currentNodes.element).playElement.click();
     } catch (e) {
-      console.log('no play element');
+      // console.log('no play element');
     }
   }
 
@@ -310,7 +310,7 @@ export default class HaveyController {
   }
 
   onSpace(e) {
-    const { dblclickInterval } = this.model.state.profileData;
+    const { dblclickInterval } = this.model.state.settings;
     e.preventDefault();
     if (this.spaceInterval) {
       clearTimeout(this.timerSpaceID);

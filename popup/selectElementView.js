@@ -1,6 +1,6 @@
 import { languageMap } from './data';
 
-export default class AbstractSelectElementView {
+export default class SelectElementView {
   constructor(data) {
     this.data = data;
   }

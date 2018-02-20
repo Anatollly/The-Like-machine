@@ -8,20 +8,22 @@
     <title></title>
   </head>
   <body>
+    <div class="hidden-layer"></div>
     <div class="container-fluid buttons-area">
-      <div class="btn-group btn-group-lg d-flex justify-content-center lm--btn-add" style="margin: 25px 0" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-secondary lm--button-on">On</button>
+      <div class="btn-group btn-group d-flex justify-content-center lm--btn-add" style="margin: 15px 0" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-secondary lm--button-on" style="z-index: 1001">On</button>
         <button type="button" class="btn btn-secondary lm--button-top">Top</button>
         <button type="button" class="btn btn-secondary lm--button-download">Download</button>
-        <button type="button" class="btn btn-secondary lm--button-saveTag">#</button>
+        <button type="button" class="btn btn-secondary lm--button-saveTag">##</button>
+        <button type="button" class="btn btn-secondary lm--button-zeroCounter">00</button>
       </div>
     </div>
-    <div class="btn-group btn-group-lg d-flex justify-content-center lm--btn-main" style="margin: 25px 0" role="group" aria-label="Basic example">
+    <div class="btn-group btn-group d-flex justify-content-center lm--btn-main" style="margin: 15px 0" role="group" aria-label="Basic example">
       <button type="button" class="btn btn-secondary lm--button-start">Start</button>
       <button type="button" class="btn btn-secondary lm--button-pause">Pause</button>
       <button type="button" class="btn btn-secondary lm--button-stop">Stop</button>
     </div>
-    </div>
+    <p class="text-justify text-center text-danger info-text" style="margin: 0"></p>
     <ul class="nav nav-tabs" id="myTab" role="tablist">
       <li class="nav-item">
         <a class="nav-link lm--tab active lm--tab-settings" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="home" aria-selected="true">Настройки</a>
@@ -62,10 +64,6 @@
           </li>
         </ul>
         <div class="tab-content favorites-element" id="pills-tabContent">
-          <!-- <div class="tab-pane fade show active" id="pills-locations" role="tabpanel" aria-labelledby="pills-home-tab">...</div>
-          <div class="tab-pane fade" id="pills-tags" role="tabpanel" aria-labelledby="pills-tags-tab">...</div>
-          <div class="tab-pane fade" id="pills-accounts" role="tabpanel" aria-labelledby="pills-accounts-tab">...</div>
-          <div class="tab-pane fade" id="pills-photos" role="tabpanel" aria-labelledby="pills-photos-tab">...</div> -->
         </div>
       </div>
       <div class="tab-pane fade" id="manual" role="tabpanel" aria-labelledby="manual-tab">...</div>

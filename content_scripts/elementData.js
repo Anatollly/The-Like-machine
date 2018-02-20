@@ -14,7 +14,6 @@ class ElementData {
     try {
       return document.querySelector('.coreSpriteDesktopNavProfile').href;
     } catch (e) {
-      console.log('no profile');
     }
   }
 
@@ -51,7 +50,6 @@ class ElementData {
     try {
       return this.userElement.innerHTML;
     } catch (e) {
-      // console.log('No name');
     }
   }
 
@@ -59,7 +57,6 @@ class ElementData {
     try {
       return this.userElement.href;
     } catch (e) {
-      console.log('no userLink');
     }
   }
 
@@ -72,7 +69,6 @@ class ElementData {
     try {
       return this.locationElement.innerHTML;
     } catch (e) {
-      // console.log('No location');
     }
   }
 
@@ -80,7 +76,6 @@ class ElementData {
     try {
       return this.locationElement.href;
     } catch (e) {
-      // console.log('No location link');
     }
   }
 
@@ -102,7 +97,6 @@ class ElementData {
     try {
       return this.imageElement.alt;
     } catch (e) {
-      console.log('no description');
     }
   }
 
@@ -110,7 +104,6 @@ class ElementData {
     try {
       return this.imageElement.src;
     } catch (e) {
-      console.log('no image src');
       return null;
     }
   }
@@ -128,7 +121,6 @@ class ElementData {
     try {
       return parse(this.timeElement.href, true).pathname;
     } catch (e) {
-      console.log('no post link');
     }
   }
 
@@ -136,7 +128,6 @@ class ElementData {
     try {
       return this.timeElement.querySelector('time').dateTime || 0;
     } catch (e) {
-      console.log('no date create');
     }
   }
 

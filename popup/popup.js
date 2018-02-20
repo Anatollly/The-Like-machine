@@ -1,21 +1,18 @@
-import AbstractSelectElementView from './abstractSelectElementView';
-import AbstractInputElementView from './abstractInputElementView';
-import favoritesElement from './abstractFavoritesLinkView'
+import SelectElementView from './selectElementView';
+import InputElementView from './inputElementView';
+import favoritesElement from './favoritesLinkView'
 import { settigsDataSelect, settigsDataInput, initProfileData, translator, languageMap } from './data';
 
 // onClick icon
 chrome.browserAction.onClicked.addListener((tab) => {
   chrome.tabs.query({active: true, currentWindow: true}, tabs => {
     chrome.tabs.sendMessage(tabs[0].id, {click: "icon", url: tabs[0].url}, () => {
-      console.log('click icon');
     });
   });
 });
 
 const sendMessageToContent = (data) => {
   chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-    // data.url = tabs[0].url;
-    console.log('send message: ', data);
     chrome.tabs.sendMessage(tabs[0].id, data);
   });
 };
@@ -24,10 +21,10 @@ const getSettingsElements = (state) => {
   const elements = {};
   Object.keys(state).forEach((item, i) => {
     if (settigsDataSelect.hasOwnProperty(item)) {
-      elements[item] = new AbstractSelectElementView(settigsDataSelect[item]);
+      elements[item] = new SelectElementView(settigsDataSelect[item]);
     }
     if (settigsDataInput.hasOwnProperty(item)) {
-      elements[item] = new AbstractInputElementView(settigsDataInput[item]);
+      elements[item] = new InputElementView(settigsDataInput[item]);
     }
   })
   return elements;
@@ -84,8 +81,13 @@ const changeElementLang = (elements, language) => {
   })
 }
 
+const setInfoText = (element, text) => {
+  element.innerHTML = text;
+}
+
 window.onload = () => {
   const popupData = {};
+  const hiddenLayer = document.querySelector('.hidden-layer');
   const settingsTab = document.querySelector('.settings-element');
   const btnGroupMain = document.querySelector('.lm--btn-main');
   const btnGroupAdd = document.querySelector('.lm--btn-add');
@@ -103,32 +105,46 @@ window.onload = () => {
   const topBtn = btnGroupAdd.querySelector('.lm--button-top');
   const downloadBtn = btnGroupAdd.querySelector('.lm--button-download');
   const saveTagBtn = btnGroupAdd.querySelector('.lm--button-saveTag');
+  const zeroCounterBtn = btnGroupAdd.querySelector('.lm--button-zeroCounter');
   const favoritesTab = document.querySelector('.favorites-element');
+  const infoText = document.querySelector('.info-text');
 
   // listening incoming messages
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log('message: ', message);
-    const { profileState, favoritesState } = message;
-    if (profileState) {
-      popupData['profileData'] = profileState;
-      popupData['settingsElement'] = getSettingsElements(profileState);
-      changeElementLang({ save, cancel, reset, settings, favorites, manual, additionally}, profileState.language);
-      showSettingsElements(settingsTab, popupData.settingsElement, profileState);
+    const { settingsState, favoritesState, error403, LMOn } = message;
+    if (settingsState) {
+      popupData['settingsData'] = settingsState;
+      popupData['settingsElement'] = getSettingsElements(settingsState);
+      changeElementLang({ save, cancel, reset, settings, favorites, manual, additionally}, settingsState.language);
+      showSettingsElements(settingsTab, popupData.settingsElement, settingsState);
     }
     if (favoritesState) showTags(favoritesState, favoritesTab);
+    if (error403) {
+      infoText.innerHTML = 'Инстаграм зафиксировал что вы ставите слишком много лайков. Пожалуйста, подождите минимум 2 минуты чтобы продолжить';
+    } else {
+      infoText.innerHTML = '';
+    }
+    if (LMOn === false) {
+      hiddenLayer.style = 'bottom: 0;'
+      onBtn.innerHTML = 'On';
+    }
+    if (LMOn === true) {
+      hiddenLayer.style = 'bottom: 100%;';
+      onBtn.innerHTML = 'Off';
+    }
   });
 
   save.addEventListener('click', () => {
-    const { profileData, settingsElement } = popupData;
-    sendMessageToContent({ popupChangeState: getSettingsValue(settingsElement, profileData) });
+    const { settingsData, settingsElement } = popupData;
+    sendMessageToContent({ popupChangeSettings: getSettingsValue(settingsElement, settingsData) });
   })
 
   cancel.addEventListener('click', () => {
-    sendMessageToContent({ popupChangeState: popupData.profileData });
+    sendMessageToContent({ popupChangeSettings: popupData.settingsState });
   })
 
   reset.addEventListener('click', () => {
-    sendMessageToContent({ popupResetState: true });
+    sendMessageToContent({ popupResetSettings: true });
   })
 
   // listening click elements
@@ -143,13 +159,8 @@ window.onload = () => {
     if (e.target === topBtn) sendMessageToContent({click: 'top'});
     if (e.target === downloadBtn) sendMessageToContent({click: 'download'});
     if (e.target === saveTagBtn) sendMessageToContent({click: 'saveTag'});
+    if (e.target === zeroCounterBtn) sendMessageToContent({click: 'zeroCounter'});
   })
-
-  // listening input elements
-  // maxLikesInput.addEventListener('input', (e) => {
-  //   profileData.maxLikes = maxLikesInput.value * 1;
-  //   sendMessageToContent({ popupChangeState: profileData });
-  // });
 
   // request initial state
   sendMessageToContent({ popupInitState: true });

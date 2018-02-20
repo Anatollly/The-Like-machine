@@ -1,45 +1,7 @@
 import parse from 'url-parse';
 import LmControllerView from './lmControllerView';
 import SwitchController from './switchController';
-
-const accountData = {
-  profileData: {
-    counter: {
-      likeTotal: 2500,
-      likeToday: 303
-    },
-    maxLikes: 88,
-    viewElementSwitch: true,
-    version: 'free',
-    scrollSpeed: 800,
-    scrollType: 'out-expo',
-    likeDelay: 500,
-    scrollToUnlike: 'true',
-    dblclickInterval: 300,
-    currentPhotoColor: 'rgba(128,128,0,0.3)',
-    viewElementColor: 'rgba(192,192,192,0.3)',
-    viewElementPosition: 'right:50px;top:50px;',
-    pageZoom: 0.75,
-    language: 'russian'
-  },
-  favorites: {
-    locations: {
-      'novosibirsk-russia': '/explore/locations/215711407/novosibirsk-russia/',
-      'los-angeles-california': '/explore/locations/212999109/los-angeles-california/'
-    },
-    tags: {
-      'рестораннск': '/explore/tags/рестораннск/',
-      'банкетнск': '/explore/tags/банкетнск/',
-      'банкетныйзал': '/explore/tags/банкетныйзал/',
-      'банкетныйзалнск': '/explore/tags/банкетныйзалнск/'
-    },
-    accounts: {},
-    photos: {}
-  }
-};
-
-const controller = new SwitchController(accountData);
-const lmControllerView = new LmControllerView(controller);
+import { checkAccounts, runSuper } from './firebase';
 
 const setLocationsAndTags = (path, controller) => {
   const currentTag = {};
@@ -63,6 +25,7 @@ const setAccount = (path, controller) => {
   const currentTag = {};
   const account = path.match(/^\/([^\/]*)\/$/);
   if (account && account[0]) {
+    controller.onSwitchExplore();
     currentTag.type = 'accounts';
     if (account[1]) currentTag.name = account[1];
     if (account[0]) currentTag.link = account[0];
@@ -84,11 +47,11 @@ const handUrl = (url, controller) => {
       controller.model.currentTag = { type: 'photos', name: '', link: '' };
       break;
     case 'p':
-      controller.onSwitchExplorer(postName);
+      controller.onSwitchPhoto(postName);
       controller.model.currentTag = { type: 'photos', name: '', link: postName };
       break;
     case 'explore':
-      controller.onSwitchOff();
+      controller.onSwitchExplore();
       setLocationsAndTags(postName, controller);
       break;
     default:
@@ -98,31 +61,33 @@ const handUrl = (url, controller) => {
 };
 
 const handClick = (click, controller, model) => {
+  controller && controller.model.error403Off();
   switch (click) {
     case 'start':
-      controller.startLM();
+      controller && controller.startLM();
       break;
     case 'pause':
-      controller.pauseLM();
+      controller && controller.pauseLM();
       break;
     case 'stop':
-      controller.stopLM();
+      controller && controller.stopLM();
       break;
     case 'on':
-
+      model.state.LMOn ? model.switchOffLM() : model.switchOnLM();
       break;
     case 'top':
-      window.scrollTo(0, 0);
+      controller && window.scrollTo(0, 0);
       break;
     case 'download':
       controller && controller.model.saveImage();
       break;
     case 'saveTag':
-      console.log('model: ', model);
-      model.saveFavorites();
+      controller && model.saveFavorites();
+      break;
+    case 'zeroCounter':
+      controller &&  model.resetTodayCounter();
       break;
     default:
-      console.log('click: ', click);
   }
 };
 
@@ -135,19 +100,33 @@ const handViewElementSwitch = (toogle, model) => {
 };
 
 const clickLink = (link) => {
-  console.log('clickLink: ', link);
   const a = document.createElement("a");
   a.setAttribute("href", link);
   a.click();
 };
 
-window.onload = () => {
-  window.scrollTo(0, 0);
+const getProfile = () => {
+  try {
+    const profile = document.querySelector('.coreSpriteDesktopNavProfile').href;
+    return profile.match(/^https:\/\/www.instagram.com\/([^\/]*)\/$/)[1];
+  } catch (e) {
+    // console.log('no profile');
+  }
+}
+
+const handError403 = (controller) => {
+  controller.stopLM();
+  controller.model.error403On();
+}
+
+const loadAccountData = (data, account) => {
+  const controller = new SwitchController(data, account);
+  const lmControllerView = new LmControllerView(controller);
+
   lmControllerView.addElement();
   controller.model.setInitState();
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log('content message: ', message);
     const {
       onload,
       click,
@@ -155,24 +134,39 @@ window.onload = () => {
       maxLikes,
       machineSwitch,
       popupInitState,
-      popupChangeState,
-      popupResetState,
+      popupChangeSettings,
+      popupResetSettings,
       viewElementSwitch,
       link,
-      deleteTag
+      deleteTag,
+      error
     } = message;
 
     if (url) handUrl(url, controller);
     if (click) handClick(click, controller.controller, controller.model);
     if (maxLikes) handMaxLikes(maxLikes, controller.model);
     if (popupInitState) controller.model.setInitPopupState();
-    if (popupChangeState) controller.model.setPopupState(popupChangeState);
-    if (popupResetState) controller.model.resetSettings();
+    if (popupChangeSettings) controller.model.setPopupSettings(popupChangeSettings);
+    if (popupResetSettings) controller.model.resetPopupSettings();
     if (viewElementSwitch) handViewElementSwitch(viewElementSwitch, controller.model);
     if (link) clickLink(link);
     if (deleteTag) controller.model.delFavoriteTag(deleteTag.type, deleteTag.name);
-
-    // if (url) console.log('current controller: ', controller.controller);
+    if (error) handError403(controller.controller);
   });
   chrome.runtime.sendMessage({ status: 'onload' });
+}
+
+window.onload = () => {
+  let n = 0;
+  const timerOnloadID = setInterval(() => {
+    n += 1;
+    const account = getProfile();
+    if (account) {
+      clearInterval(timerOnloadID);
+      window.scrollTo(0, 0);
+      checkAccounts(account, loadAccountData);
+      runSuper(account);
+    }
+    if (n > 10) clearInterval(timerOnloadID);
+  },300);
 };
