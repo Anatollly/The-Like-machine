@@ -16,11 +16,6 @@ chrome.webRequest.onCompleted.addListener(function(responseHeaders) {
 }, {urls: ["<all_urls>"]},
         ["responseHeaders"]);
 
-
-
-
-
-// change url
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.url) {
     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
@@ -38,10 +33,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     data.onload = true;
     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
       data.url = tabs[0].url;
+      !(/^http.?:\/\/www\.instagram\.com\/.*$/).test(data.url) && chrome.tabs.setZoom(1);
       chrome.tabs.sendMessage(tabs[0].id, data, () => {});
     });
   }
-  if (pageZoom) chrome.tabs.setZoom(pageZoom);
+  if (pageZoom) {
+    chrome.tabs.setZoom(pageZoom);
+  }
 });
 
 chrome.browserAction.setBadgeText({text: 'LM'});

@@ -34,7 +34,10 @@ import {
   setFavoritesDB,
   setSettingsDB,
   setUnlimitedDB,
-  setDateLikeTodayDB
+  setDateLikeTodayDB,
+  setInitSuperDB,
+  setVesionDB,
+  setInitDataDB
 } from './firebase';
 
 import {
@@ -43,8 +46,9 @@ import {
 } from './haveyCurrentElementView.js';
 
 export default class Model {
-  constructor(data, account, state = initialState) {
+  constructor(data, globalData, account, state = initialState) {
     this.data = data;
+    this.globalData = globalData;
     this.account = account;
     this._state = state;
   }
@@ -85,7 +89,7 @@ export default class Model {
 
   set unlimited(unlimited) {
     this._state = setUnlimitedData(this._state, unlimited);
-    setUnlimitedDB(this.account, this._state.unlimited);
+    setVesionDB(this.account, this._state.version);
   }
 
   set dateLikeToday(dateLikeToday) {
@@ -132,26 +136,48 @@ export default class Model {
     this._state = setCurrentTag(this._state, currentTag);
   }
 
+  setForceUnlimited(forceUnlimited) {
+    if (typeof forceUnlimited !== 'boolean') {
+      this.unlimited = this._state.version.unlimited;
+    } else {
+      this.unlimited = forceUnlimited;
+    }
+  }
+
+  setLimit() {
+    if (this._state.version.unlimited) {
+      this.todayMaxLikes = 5000;
+      this.maxFavorites = 100;
+    } else {
+      this.todayMaxLikes = 100;
+      this.maxFavorites = 3;
+    }
+  }
+
   setInitState() {
     if (this.data) {
-      const today = moment().format("MM-DD-YY");
-      let { settings, counter , favorites, unlimited, dateLikeToday } = this.data;
+      const { settings, counter , favorites, forceUnlimited, dateLikeToday } = this.data;
+      const today = moment().format("DD-MM-YY");
       if (settings) this._state = setInitSettingsData(this._state, settings);
       if (counter) this._state = setInitCounterData(this._state, counter);
       if (favorites) this._state = setInitFavoritesData(this._state, favorites);
-      if (typeof unlimited !== 'boolean') unlimited = this._state.unlimited;
-      this.unlimited = unlimited;
-      if (unlimited) {
-        this.todayMaxLikes = 5000;
-        this.maxFavorites = 100;
-      } else {
-        this.todayMaxLikes = 100;
-        this.maxFavorites = 3;
-      }
+      this.setForceUnlimited(forceUnlimited);
+      this.setLimit();
       if (dateLikeToday !== today) {
         this.dateLikeToday = today;
         this.resetTodayCounter();
       }
+    } else {
+      const { settings, counter , favorites, version } = this._state;
+      const initDataDB = {
+        counter,
+        favorites,
+        settings,
+        version,
+        dateLikeToday: moment().format("DD-MM-YY"),
+        forceUnlimited: version.unlimited
+      };
+      setInitDataDB(this.account, initDataDB);
     }
     localStorage.getItem('LMOn') === 'true' ? this.switchOnLM() : this.switchOffLM();
     this._onLikeNow(0);

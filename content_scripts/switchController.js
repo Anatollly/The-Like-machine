@@ -4,10 +4,11 @@ import ExploreController from './exploreController';
 import Model from './model';
 
 export default class SwitchController {
-  constructor(data, account) {
+  constructor(data, globalData, account) {
     this.data = data;
     this.account = account;
-    this.model = new Model(this.data, this.account);
+    this.globalData = globalData;
+    this.model = new Model(this.data, this.globalData, this.account);
     this.haveyController = new HaveyController(this.model);
     this.photoController = new PhotoController(this.model);
     this.exploreController = new ExploreController(this.model);

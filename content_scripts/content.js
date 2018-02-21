@@ -1,7 +1,7 @@
 import parse from 'url-parse';
 import LmControllerView from './lmControllerView';
 import SwitchController from './switchController';
-import { checkAccounts, runSuper } from './firebase';
+import { checkAccounts } from './firebase';
 
 const setLocationsAndTags = (path, controller) => {
   const currentTag = {};
@@ -119,8 +119,8 @@ const handError403 = (controller) => {
   controller.model.error403On();
 }
 
-const loadAccountData = (data, account) => {
-  const controller = new SwitchController(data, account);
+const loadAccountData = (data, globalData, account) => {
+  const controller = new SwitchController(data, globalData, account);
   const lmControllerView = new LmControllerView(controller);
 
   lmControllerView.addElement();
@@ -164,9 +164,7 @@ window.onload = () => {
     if (account) {
       clearInterval(timerOnloadID);
       window.scrollTo(0, 0);
-      console.log('account: ', account);
       checkAccounts(account, loadAccountData);
-      runSuper(account);
     }
     if (n > 10) clearInterval(timerOnloadID);
   },300);

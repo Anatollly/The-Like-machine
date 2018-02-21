@@ -22,7 +22,11 @@ export const initialState = {
     accounts: {},
     photos: {}
   },
-  unlimited: false,
+  version: {
+    versionNum: '1.0.3',
+    versionType: 'free',
+    unlimited: false
+  },
   dateLikeToday: '',
   todayMaxLikes: 100,
   maxFavorites: 3,
@@ -198,7 +202,8 @@ export const setCurrentTag = (data, currentTag) => {
 export const setUnlimitedData = (data, unlimited) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof unlimited !== 'boolean') throw new Error('Invalid data type. Arguments: "unlimited"');
-  return Object.assign({}, data, { unlimited });
+  const version = Object.assign({}, data.version , { unlimited });
+  return Object.assign({}, data, { version });
 };
 
 export const setDateLikeTodayData = (data, dateLikeToday) => {
