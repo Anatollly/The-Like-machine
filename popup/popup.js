@@ -112,7 +112,6 @@ window.onload = () => {
   // listening incoming messages
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { settingsState, favoritesState, error403, LMOn } = message;
-    console.log('message: ', message);
     if (settingsState) {
       popupData['settingsData'] = settingsState;
       popupData['settingsElement'] = getSettingsElements(settingsState);

@@ -64,7 +64,7 @@ export function setSettingsDB(account, data) {
 }
 
 
-export function setVesionDB(account, version) {
+export function setVersionDB(account, version) {
   try {
     const usersRef = firebase.database().ref('accounts/' + account + '/version/').set(version);
   } catch (e) {

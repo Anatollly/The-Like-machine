@@ -28,7 +28,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 chrome.browserAction.setTitle({title: 'The Like-machine'});
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  const { status, pageZoom } = message;
+  const { status, pageZoom, unlimited } = message;
   if (status === 'onload') {
     data.onload = true;
     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
@@ -37,9 +37,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       chrome.tabs.sendMessage(tabs[0].id, data, () => {});
     });
   }
-  if (pageZoom) {
-    chrome.tabs.setZoom(pageZoom);
-  }
+  if (pageZoom) chrome.tabs.setZoom(pageZoom);
+  if (unlimited) chrome.browserAction.setBadgeText({text: unlimited });
 });
-
-chrome.browserAction.setBadgeText({text: 'LM'});

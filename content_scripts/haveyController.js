@@ -232,7 +232,12 @@ export default class HaveyController {
     if (this.play) {
       this.likeCurrentElement();
       this.likePhotoTimerID = setTimeout(() => {
-        const { settings: { maxLikes }, counter: { likeToday }, likeNowCounter, todayMaxLikes } = this.model.state;
+        const {
+          settings: { maxLikes },
+          counter: { likeToday },
+          likeNowCounter,
+          version: { todayMaxLikes }
+        } = this.model.state;
         likeNowCounter < maxLikes && likeToday < todayMaxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
       }, likeDelay);
     }

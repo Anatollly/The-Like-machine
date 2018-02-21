@@ -36,7 +36,7 @@ import {
   setUnlimitedDB,
   setDateLikeTodayDB,
   setInitSuperDB,
-  setVesionDB,
+  setVersionDB,
   setInitDataDB
 } from './firebase';
 
@@ -89,7 +89,6 @@ export default class Model {
 
   set unlimited(unlimited) {
     this._state = setUnlimitedData(this._state, unlimited);
-    setVesionDB(this.account, this._state.version);
   }
 
   set dateLikeToday(dateLikeToday) {
@@ -136,21 +135,15 @@ export default class Model {
     this._state = setCurrentTag(this._state, currentTag);
   }
 
-  setForceUnlimited(forceUnlimited) {
-    if (typeof forceUnlimited !== 'boolean') {
-      this.unlimited = this._state.version.unlimited;
-    } else {
-      this.unlimited = forceUnlimited;
-    }
-  }
-
   setLimit() {
     if (this._state.version.unlimited) {
       this.todayMaxLikes = 5000;
       this.maxFavorites = 100;
+      chrome.runtime.sendMessage({ unlimited: 'P' });
     } else {
       this.todayMaxLikes = 100;
       this.maxFavorites = 3;
+      chrome.runtime.sendMessage({ unlimited: 'f' });
     }
   }
 
@@ -161,12 +154,13 @@ export default class Model {
       if (settings) this._state = setInitSettingsData(this._state, settings);
       if (counter) this._state = setInitCounterData(this._state, counter);
       if (favorites) this._state = setInitFavoritesData(this._state, favorites);
-      this.setForceUnlimited(forceUnlimited);
+      if (forceUnlimited) this.unlimited = true;
       this.setLimit();
       if (dateLikeToday !== today) {
         this.dateLikeToday = today;
         this.resetTodayCounter();
       }
+      setVersionDB(this.account, this._state.version);
     } else {
       const { settings, counter , favorites, version } = this._state;
       const initDataDB = {
@@ -175,7 +169,8 @@ export default class Model {
         settings,
         version,
         dateLikeToday: moment().format("DD-MM-YY"),
-        forceUnlimited: version.unlimited
+        forceUnlimited: false,
+        createAccount: moment().format("DD-MM-YY_HH:mm:ss")
       };
       setInitDataDB(this.account, initDataDB);
     }
@@ -221,7 +216,7 @@ export default class Model {
   saveFavorites() {
     try {
       let { type, name, link } = this._state.currentTag;
-      if (Object.keys(this._state.favorites[type]).length <= this._state.maxFavorites) {
+      if (Object.keys(this._state.favorites[type]).length < this._state.version.maxFavorites) {
         if (type === 'photos') {
           const userName = elementData(this._state.currentElement).userName.replace(/[.,#$\/\[\]]/g, '_');
           const date = moment(elementData(this._state.currentElement).dateCreate).format("DD-MM-YYYY_HH:mm");
