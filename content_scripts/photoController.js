@@ -96,9 +96,9 @@ export default class PhotoController {
     const heartFull = elementData(currentNodes.element).heartFull;
     if (!heartFull) {
       this.likeElement(currentNodes);
-      this.likesHeart += 1;
-    } else {
       this.likesHeart = 0;
+    } else {
+      this.likesHeart += 1;
     }
     console.log('likesHeart: ', this.likesHeart);
   }
