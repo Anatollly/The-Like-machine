@@ -98,8 +98,9 @@ export default class PhotoController {
       this.likeElement(currentNodes);
       this.likesHeart += 1;
     } else {
-      this.likesHeart += 0;
+      this.likesHeart = 0;
     }
+    console.log('likesHeart: ', this.likesHeart);
   }
 
   goToNextElement(callback) {
@@ -169,6 +170,8 @@ export default class PhotoController {
   pauseLM() {
     this.play = false;
     clearTimeout(this.likePhotoTimerID);
+    clearTimeout(this.timerErrorID);
+    clearTimeout(this.timerFiftyID);
     this.addListKeyboard();
     this.model.remotePhoto = { start: false, pause: false, stop: false};
   }
@@ -176,6 +179,8 @@ export default class PhotoController {
   stopLM() {
     this.play = false;
     clearTimeout(this.likePhotoTimerID);
+    clearTimeout(this.timerErrorID);
+    clearTimeout(this.timerFiftyID);
     this.model.resetLikeNowCounter();
     this.addListKeyboard();
     this.model.remotePhoto = { start: false, pause: false, stop: false};
@@ -276,6 +281,8 @@ export default class PhotoController {
     this.onOpenPost = null;
     clearInterval(this.openPostTimerID);
     clearTimeout(this.likePhotoTimerID);
+    clearTimeout(this.timerErrorID);
+    clearTimeout(this.timerFiftyID);
     this.model.resetLikeNowCounter();
     this.removeListKeyboard();
     this.element && this.removeListElement(this.element)
