@@ -27,7 +27,7 @@ export default class PhotoController {
       try {
         this.openPostTimerID = setInterval(() => {
           this.openCount += 1;
-          if (this.openCount > 30)  clearInterval(this.openPostTimerID);
+          if (this.openCount > 100)  clearInterval(this.openPostTimerID);
           if (this.wrapElement && elementData(this.articleElement).postLink === postName) {
             !this.play && this.addListKeyboard();
             clearInterval(this.openPostTimerID);
@@ -46,7 +46,7 @@ export default class PhotoController {
             if (this.model.state.remotePhoto.pause) this.pauseLM();
             if (this.model.state.remotePhoto.stop) this.stopLM();
           }
-        }, 200);
+        }, 300);
       } catch (e) {
         this.stopController();
       }
@@ -94,7 +94,7 @@ export default class PhotoController {
   likeCurrentElement() {
     const { currentNodes } = this;
     const heartFull = elementData(currentNodes.element).heartFull;
-    if (!hertFull) {
+    if (!heartFull) {
       this.likeElement(currentNodes);
       this.likesHeart += 1;
     } else {

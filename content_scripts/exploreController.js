@@ -51,8 +51,8 @@ export default class ExploreController {
           this.model.remotePhoto = { start: true, pause: false, stop: false};
           !skipTheBest && this.firstBestPhoto ? this.firstBestPhoto.click() : this.firstNewPhoto.click();
         }
-        if (n > 50) clearInterval(timerStartID);
-      }, 200);
+        if (n > 100) clearInterval(timerStartID);
+      }, 300);
     } catch (e) {
       clearInterval(this.timerStartID);
       this.model.playFavorites = false;
