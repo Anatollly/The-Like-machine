@@ -1,5 +1,6 @@
 import elementData from './elementData';
 import moment from 'moment';
+import storage from './storage';
 
 import {
   initialState,
@@ -13,8 +14,11 @@ import {
   addElementNodes,
   delElementNodes,
   setCurrentHaveyElementNum,
+  setCurrentFavoriteLinkNum,
   setCurrentElement,
-  setPlayPhoto,
+  // setPlayPhoto,
+  setRemotePhoto,
+  setPlayFavorites,
   setError403,
   setOnOffLm,
   setLikeNowCounter,
@@ -26,7 +30,8 @@ import {
   setInitCounterData,
   setDateLikeTodayData,
   setTodayMaxLikesData,
-  setMaxFavoritesData
+  setMaxFavoritesData,
+  setFavoriteLinks
 } from './data';
 
 import {
@@ -119,9 +124,21 @@ export default class Model {
     this.setCurrentEl(element);
   }
 
-  set playPhoto(playPhoto) {
-    this._state = setPlayPhoto(this._state, playPhoto);
+  set remotePhoto(remotePhoto) {
+    this._state = setRemotePhoto(this._state, remotePhoto);
   }
+
+  // set playFavorites(playFavorites) {
+  //   this._state = setPlayFavorites(this._state, playFavorites);
+  // }
+
+  // set favoriteLinks(favoriteLinks) {
+  //   this._state = setFavoriteLinks(this._state, favoriteLinks);
+  // }
+
+  // set currentFavoriteLinkNum(currentFavoriteLinkNum) {
+  //   this._state = setCurrentFavoriteLinkNum(this._state, currentFavoriteLinkNum);
+  // }
 
   set error403(error403) {
     this._state = setError403(this._state, error403);
@@ -197,7 +214,23 @@ export default class Model {
 
   resetPopupSettings() {
     this.settings = initialState.settings
+    const {
+      elementsNodes,
+      currentHaveyElementNum,
+      settings: {
+        currentPhotoColor,
+        viewElementColor,
+        viewElementSwitch,
+        viewElementPosition,
+        pageZoom
+      }
+    } = this._state;
     chrome.runtime.sendMessage({ settingsState: this._state.settings });
+    this._onStyleViewElement(viewElementColor, viewElementPosition);
+    this._onViewElementSwitch(viewElementSwitch);
+    chrome.runtime.sendMessage({ pageZoom });
+    const currentNodes = elementsNodes[currentHaveyElementNum];
+    currentNodes && handleCurrentElement(currentNodes.element, currentPhotoColor);
   }
 
   setCurrentHaveyElNum(num) {
@@ -361,5 +394,39 @@ export default class Model {
     prevElementNodes && handlePrevElement(prevElementNodes.element);
     chrome.runtime.sendMessage({ LMOn: false });
     localStorage.setItem('LMOn', false);
+  }
+
+  clickInstagramLink(link) {
+    const a = document.createElement("a");
+    a.setAttribute("href", `https://www.instagram.com${link}`);
+    a.click();
+  };
+
+  startNextItemFavorites() {
+    try {
+      const { favoriteLinks, currentFavoriteLinkNum, playFavorites, currentLink } = storage;
+      this.timerStartNextItemFavoritesID = setTimeout(() => {
+        if (currentFavoriteLinkNum < favoriteLinks.length - 1) {
+          storage.currentFavoriteLinkNum = currentFavoriteLinkNum + 1;
+          storage.currentLink = favoriteLinks[currentFavoriteLinkNum + 1];
+          this.clickInstagramLink(favoriteLinks[currentFavoriteLinkNum + 1]);
+        } else {
+          storage.resetStorage();
+        }
+      }, this._state.settings.tagDelay * 60 * 1000)
+    } catch (e) {
+      clearTimeout(this.timerStartNextItemFavoritesID);
+      storage.resetStorage();
+    }
+  }
+
+  startFavorites(links) {
+    storage.state = {
+      playFavorites: true,
+      favoriteLinks: links,
+      currentFavoriteLinkNum: 0,
+      currentLink: links[0]
+    }
+    this.clickInstagramLink(links[0]);
   }
 }

@@ -15,7 +15,7 @@ export default class SelectElementView {
   get value() {
     try {
       const select = this._element.querySelector('select');
-      return select.options[select.selectedIndex].value;;
+      return select.options[select.selectedIndex].value;
     } catch (e) {
       return 'value error';
     }

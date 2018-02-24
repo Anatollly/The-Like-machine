@@ -5,10 +5,15 @@ export const initialState = {
   },
   settings: {
     maxLikes: 10,
+    photoDelay: 2,
+    tagDelay: 3,
+    fiftyDelay: 2,
+    errorDelay: 10,
+    numFullHearts: 3,
+    skipTheBest: false,
     viewElementSwitch: false,
     scrollSpeed: 1000,
     scrollType: 'out-expo',
-    likeDelay: 800,
     dblclickInterval: 300,
     currentPhotoColor: 'rgba(0,128,128,0.3)',
     viewElementColor: 'rgba(0,128,128,0.3)',
@@ -23,19 +28,26 @@ export const initialState = {
     photos: {}
   },
   version: {
-    versionNum: '1.0.0',
+    versionNum: '1.0.4',
     versionType: 'pro',
-    unlimited: false,
+    unlimited: true,
     todayMaxLikes: 5000,
     maxFavorites: 100
   },
   dateLikeToday: '',
   elementsData: {},
   elementsNodes: {},
+  favoriteLinks: [],
   currentHaveyElementNum: 0,
+  currentFavoriteLinkNum: 0,
   likeNowCounter: 0,
   currentElement: null,
-  playPhoto: false,
+  remotePhoto: {
+    start: false,
+    pause: false,
+    stop: false
+  },
+  playFavorites: false,
   error403: false,
   LMOn: false,
   currentTag: {
@@ -148,10 +160,22 @@ export const delElementNodes = (data, num) => {
   return Object.assign({}, data);
 };
 
+export const setFavoriteLinks= (data, favoriteLinks) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  // if (!favoriteLinks.isArray()) throw new Error('Invalid data type. Arguments: "favoriteLinks"');
+  return Object.assign({}, data, { favoriteLinks });
+};
+
 export const setCurrentHaveyElementNum = (data, num) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof num !== 'number') throw new Error('Invalid data type. Arguments: "num"');
   return Object.assign({}, data, { currentHaveyElementNum: num });
+};
+
+export const setCurrentFavoriteLinkNum = (data, currentFavoriteLinkNum) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof currentFavoriteLinkNum !== 'number') throw new Error('Invalid data type. Arguments: "currentFavoriteLinkNum"');
+  return Object.assign({}, data, { currentFavoriteLinkNum });
 };
 
 export const setCurrentElement = (data, currentElement) => {
@@ -160,10 +184,16 @@ export const setCurrentElement = (data, currentElement) => {
   return Object.assign({}, data, { currentElement });
 };
 
-export const setPlayPhoto = (data, playPhoto) => {
+export const setRemotePhoto = (data, remotePhoto) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
-  if (typeof playPhoto !== 'boolean') throw new Error('Invalid data type. Arguments: "playPhoto"');
-  return Object.assign({}, data, { playPhoto });
+  if (typeof remotePhoto !== 'object') throw new Error('Invalid data type. Arguments: "remotePhoto"');
+  return Object.assign({}, data, { remotePhoto });
+};
+
+export const setPlayFavorites = (data, playFavorites) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof playFavorites !== 'boolean') throw new Error('Invalid data type. Arguments: "playFavorites"');
+  return Object.assign({}, data, { playFavorites });
 };
 
 export const setError403 = (data, error403) => {

@@ -2,6 +2,7 @@ import parse from 'url-parse';
 import LmControllerView from './lmControllerView';
 import SwitchController from './switchController';
 import { checkAccounts } from './firebase';
+import storage from './storage';
 
 const setLocationsAndTags = (path, controller) => {
   const currentTag = {};
@@ -40,7 +41,7 @@ const handUrl = (url, controller) => {
   const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/);
   const postName = href[0];
   const path = href[1];
-
+  const { currentLink, playFavorites } = storage.state;
   switch (path) {
     case '':
       controller.onSwitchHavey();
@@ -53,6 +54,10 @@ const handUrl = (url, controller) => {
     case 'explore':
       controller.onSwitchExplore();
       setLocationsAndTags(postName, controller);
+      if (postName === currentLink && playFavorites) {
+        storage.currentLink = '';
+        controller.controller.startLM();
+      }
       break;
     default:
       controller.onSwitchOff();
@@ -71,6 +76,7 @@ const handClick = (click, controller, model) => {
       break;
     case 'stop':
       controller && controller.stopLM();
+      storage.resetStorage();
       break;
     case 'on':
       model.state.LMOn ? model.switchOffLM() : model.switchOnLM();
@@ -99,12 +105,6 @@ const handViewElementSwitch = (toogle, model) => {
   model.viewElementSwitch = toogle;
 };
 
-const clickLink = (link) => {
-  const a = document.createElement("a");
-  a.setAttribute("href", link);
-  a.click();
-};
-
 const getProfile = () => {
   try {
     const profile = document.querySelector('.coreSpriteDesktopNavProfile').href;
@@ -114,10 +114,10 @@ const getProfile = () => {
   }
 }
 
-const handError403 = (controller) => {
-  controller.stopLM();
-  controller.model.error403On();
-}
+// const handError403 = (controller) => {
+//   controller.stopLM();
+//   controller.model.error403On();
+// }
 
 const loadAccountData = (data, globalData, account) => {
   const controller = new SwitchController(data, globalData, account);
@@ -139,7 +139,8 @@ const loadAccountData = (data, globalData, account) => {
       viewElementSwitch,
       link,
       deleteTag,
-      error
+      error,
+      favoritesLinks
     } = message;
 
     if (url) handUrl(url, controller);
@@ -149,9 +150,10 @@ const loadAccountData = (data, globalData, account) => {
     if (popupChangeSettings) controller.model.setPopupSettings(popupChangeSettings);
     if (popupResetSettings) controller.model.resetPopupSettings();
     if (viewElementSwitch) handViewElementSwitch(viewElementSwitch, controller.model);
-    if (link) clickLink(link);
+    if (link) controller.model.clickInstagramLink(link);
     if (deleteTag) controller.model.delFavoriteTag(deleteTag.type, deleteTag.name);
-    if (error) handError403(controller.controller);
+    if (error) controller.model.error403On(); // handError403(controller.controller);
+    if (favoritesLinks) controller.model.startFavorites(favoritesLinks);
   });
   chrome.runtime.sendMessage({ status: 'onload' });
 }
@@ -168,4 +170,7 @@ window.onload = () => {
     }
     if (n > 10) clearInterval(timerOnloadID);
   },300);
+  window.onbeforeunload = () => {
+    if (!storage.currentLink) storage.resetStorage();
+  };
 };

@@ -1,8 +1,10 @@
 import elementData from './elementData';
+import storage from './storage';
 
 export default class PhotoController {
   constructor(model) {
     this.model = model;
+    this.likesHeart = 0;
   }
 
   get wrapElement() {
@@ -40,7 +42,9 @@ export default class PhotoController {
             this.leftArrow = elementData(this.currentNodes.element).leftArrow;
             this.onOpenPost && this.onOpenPost(postName);
             this.openingPost = false;
-            if (this.model.state.playPhoto) this.startLM();
+            if (this.model.state.remotePhoto.start) this.startLM();
+            if (this.model.state.remotePhoto.pause) this.pauseLM();
+            if (this.model.state.remotePhoto.stop) this.stopLM();
           }
         }, 200);
       } catch (e) {
@@ -90,7 +94,12 @@ export default class PhotoController {
   likeCurrentElement() {
     const { currentNodes } = this;
     const heartFull = elementData(currentNodes.element).heartFull;
-    !heartFull && this.likeElement(currentNodes);
+    if (!hertFull) {
+      this.likeElement(currentNodes);
+      this.likesHeart += 1;
+    } else {
+      this.likesHeart += 0;
+    }
   }
 
   goToNextElement(callback) {
@@ -110,20 +119,41 @@ export default class PhotoController {
   }
 
   onStartLM() {
-    const likeDelay = this.model.state.settings.likeDelay;
-    if (this.play) {
-      this.likePhotoTimerID = setTimeout(() => {
-        this.likeCurrentElement();
+    try {
+      const photoDelay = this.model.state.settings.photoDelay;
+      if (this.play) {
         this.likePhotoTimerID = setTimeout(() => {
-          const {
-            settings: { maxLikes },
-            counter: { likeToday },
-            likeNowCounter,
-            version: { todayMaxLikes }
-          } = this.model.state;
-          likeNowCounter < maxLikes && likeToday < todayMaxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
-        }, 500);
-      }, likeDelay);
+          this.likeCurrentElement();
+          this.likePhotoTimerID = setTimeout(() => {
+            const {
+              settings: { maxLikes, fiftyDelay, errorDelay, numFullHearts },
+              counter: { likeToday },
+              likeNowCounter,
+              error403,
+              version: { todayMaxLikes }
+            } = this.model.state;
+            if (likeNowCounter < maxLikes && likeToday < todayMaxLikes && this.likesHeart < numFullHearts) {
+              if (likeNowCounter % 5 === 0) {
+                this.timerFiftyID = setTimeout(() => {
+                  this.goToNextElement(this.onStartLM.bind(this));
+                }, fiftyDelay * 60 * 1000)
+              } else if (error403) {
+                this.timerErrorID = setTimeout(() => {
+                  this.error403Off();
+                  this.goToNextElement(this.onStartLM.bind(this));
+                }, errorDelay * 60 * 1000)
+              } else {
+                this.goToNextElement(this.onStartLM.bind(this));
+              }
+            } else {
+              this.stopLM();
+              if (storage.playFavorites && likeToday < todayMaxLikes) this.model.startNextItemFavorites();
+            }
+          }, 500);
+        }, photoDelay * 1000);
+      }
+    } catch (e) {
+      console.log('errrrrprproro');
     }
   }
 
@@ -132,7 +162,7 @@ export default class PhotoController {
       this.play = true;
       this.onStartLM();
       this.ignoreKeyboard();
-      this.model.playPhoto = false;
+      this.model.remotePhoto = { start: false, pause: false, stop: false};
     }
   }
 
@@ -140,6 +170,7 @@ export default class PhotoController {
     this.play = false;
     clearTimeout(this.likePhotoTimerID);
     this.addListKeyboard();
+    this.model.remotePhoto = { start: false, pause: false, stop: false};
   }
 
   stopLM() {
@@ -147,6 +178,7 @@ export default class PhotoController {
     clearTimeout(this.likePhotoTimerID);
     this.model.resetLikeNowCounter();
     this.addListKeyboard();
+    this.model.remotePhoto = { start: false, pause: false, stop: false};
   }
 
   onClickSpace(e) {
@@ -247,6 +279,7 @@ export default class PhotoController {
     this.model.resetLikeNowCounter();
     this.removeListKeyboard();
     this.element && this.removeListElement(this.element)
+    // this.stopLM();
   }
 
 }

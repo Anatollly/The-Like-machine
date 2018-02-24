@@ -1,9 +1,11 @@
 import { languageMap } from './data';
 
 class FavoritesLinkView {
-  constructor(data, index) {
+  constructor(data, index, dataCheckBoxes) {
     this.data = data;
     this.index = index;
+    console.log('constructor: ', dataCheckBoxes);
+    this.dataCheckBoxes = dataCheckBoxes;
   }
 
   get element() {
@@ -20,8 +22,17 @@ class FavoritesLinkView {
     Object.keys(this.data).forEach((itemTab, iTab) => {
       let btnContent = '';
       Object.keys(this.data[itemTab]).forEach((itemBtn, iBtn) => {
+        const link = `${this.data[itemTab][itemBtn]}`;
+        const checked = this.dataCheckBoxes && this.dataCheckBoxes.indexOf(link) !== -1;
         btnContent += `
-          <a href="https://www.instagram.com${this.data[itemTab][itemBtn]}" class="btn btn-info btn-sm active lm--favorites-link" style="text-align: left" role="button" aria-pressed="true" data-type="link">${itemTab === 'tags' ? "#" : ""}${decodeURI(itemBtn)}</a>
+          ${
+            (itemTab === 'locations' || itemTab === 'tags')
+              ? `<div class="form-check form-check-inline lm--favorites-checkbox">
+                  <input class="form-check-input" ${checked ? 'checked' : ''} type="checkbox" value="${link}" style="margin-right: 0">
+                </div>`
+              : '<div class="form-check form-check-inline lm--favorites-checkbox" style="width: 3"></div>'
+          }
+          <a class="btn btn-info btn-sm active lm--favorites-link" style="text-align: left" role="button" aria-pressed="true" data-type="link" data-link="${link}">${itemTab === 'tags' ? "#" : ""}${decodeURI(itemBtn)}</a>
           <a href="#" class="btn btn-danger btn-sm active lm--favorites-delete" role="button" aria-pressed="true" data-type="delete" data-tab="${itemTab}" data-item="${itemBtn}">Delete</a>
         `
       })
@@ -42,4 +53,4 @@ class FavoritesLinkView {
   }
 }
 
-export default (data, index) => new FavoritesLinkView(data, index).element;
+export default (data, index, dataCheckBoxes) => new FavoritesLinkView(data, index, dataCheckBoxes).element;

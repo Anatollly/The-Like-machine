@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="bootstrap/bootstrap.min.css">
     <link href="popup.css" rel="stylesheet">
     <script src="popup.js"></script>
     <title></title>
@@ -19,9 +19,9 @@
       </div>
     </div>
     <div class="btn-group btn-group d-flex justify-content-center lm--btn-main" style="margin: 15px 0" role="group" aria-label="Basic example">
-      <button type="button" class="btn btn-secondary lm--button-start">Start</button>
-      <button type="button" class="btn btn-secondary lm--button-pause">Pause</button>
-      <button type="button" class="btn btn-secondary lm--button-stop">Stop</button>
+      <button type="button" class="btn btn-danger lm--button-start">Start</button>
+      <button type="button" class="btn btn-danger lm--button-pause">Pause</button>
+      <button type="button" class="btn btn-danger lm--button-stop">Stop</button>
     </div>
     <p class="text-justify text-center text-danger info-text" style="margin: 0"></p>
     <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -49,6 +49,7 @@
         </div>
       </div>
       <div class="tab-pane fade" id="favorites" role="tabpanel" aria-labelledby="favorites-tab">
+        <button type="button" class="btn btn-danger lm-button lm--button-startFavorite">Start</button>
         <ul class="nav nav-pills mb-3 d-flex justify-content-end" id="pills-tab" role="tablist">
           <li class="nav-item">
             <a class="nav-link lm--pillow active" id="pills-locations-tab" data-toggle="pill" href="#pills-locations" role="tab" aria-controls="pills-locations" aria-selected="true">Locations</a>
@@ -151,8 +152,7 @@
       </div>
       <!-- <div class="tab-pane fade" id="additionally" role="tabpanel" aria-labelledby="additionally-tab">...</div> -->
     </div>
-    <script src="jquery-3.3.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="bootstrap/jquery-3.3.1.min.js"></script>
+    <script src="bootstrap/bootstrap.min.js"></script>
   </body>
 </html>

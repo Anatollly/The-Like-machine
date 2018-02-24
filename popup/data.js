@@ -4,11 +4,16 @@ export const initProfileData = {
     likeToday: 303
   },
   maxLikes: 88,
+  photoDelay: 3,
+  tagDelay: 5,
+  fiftyDelay: 2,
+  errorDelay: 10,
+  numFullHearts: 3,
+  skipTheBest: false,
   viewElementSwitch: true,
   version: 'free',
   scrollSpeed: 850,
   scrollType: 'out-expo',
-  likeDelay: 800,
   scrollToUnlike: 'true',
   dblclickInterval: 300,
   currentPhotoColor: 'rgba(0,255,255,0.3)',
@@ -37,8 +42,17 @@ export const translator = {
   showCounter: ['Show counter?', 'Показывать счетчик?'],
   no: ['No', 'Нет'],
   yes: ['Yes', 'Да'],
+  photoDelay: ['Delay: photo, sec', 'Задержка: фото, сек'],
+  tagDelay: ['Delay: tag, min', 'Задержка: тэг, мин'],
+  fiftyDelay: ['Delay: 50 photo, min', 'Задержка: 50 фото, мин'],
+  errorDelay: ['Delay: error, min', 'Задержка: ошибка, мин'],
+  skipTheBest: ['Skip the best', 'Пропускать лучшее' ],
+  numFullHearts: ['Number Like-photos', 'Число Like-постов подряд'],
   likesNumber: ['Number of likes:', 'Количество лайков:'],
-  range100: ['0 - 100', 'От 0 до 100'],
+  range999: ['1 - 999', 'От 1 до 999'],
+  rangePhoto: ['1 - 30', 'От 1 до 30'],
+  rangeTag: ['1 - 30', 'От 1 до 30'],
+  rangeError: ['5 - 60', 'От 5 до 60'],
   pageSize: ['Page size', 'Размер страницы:'],
   scrollingSpeed: ['Scrolling speed:', 'Скорость прокрутки:'],
   verySlow: ['Very slow', 'Очень медленная'],
@@ -47,7 +61,6 @@ export const translator = {
   fast: ['Fast', 'Быстрая'],
   veryFast: ['Very fast','Очень быстрая'],
   scrollingType: ['Scrolling type:', 'Тип прокрутки:'],
-  delay: ['Delay:', 'Задержка:'],
   petite: ['Petite', 'Маленькая'],
   large: ['Large', 'Большая'],
   intervalBetweenClicks: ['Interval between clicks:', 'Интервал м/у нажатиями:'],
@@ -97,7 +110,6 @@ export const settigsDataSelect = (() => {
     fast,
     veryFast,
     scrollingType,
-    delay,
     petite,
     large,
     intervalBetweenClicks,
@@ -127,6 +139,7 @@ export const settigsDataSelect = (() => {
     bottomRight,
     bottomLeft,
     topLeft,
+    skipTheBest,
     pageLanguage
   } = translator;
 
@@ -192,14 +205,6 @@ export const settigsDataSelect = (() => {
         ['in-out-bounce', 'in-out-bounce'],
       ])
     },
-    likeDelay: {
-      label: delay,
-      options: new Map([
-        [500, petite],
-        [800, average],
-        [1200, large]
-      ])
-    },
     dblclickInterval: {
       label: intervalBetweenClicks,
       options: new Map([
@@ -258,6 +263,13 @@ export const settigsDataSelect = (() => {
         ['left:20px;top:80px;', topLeft]
       ])
     },
+    skipTheBest: {
+      label: skipTheBest,
+      options: new Map([
+        [false, no],
+        [true, yes]
+      ])
+    },
     language: {
       label: pageLanguage,
       options: new Map([
@@ -271,13 +283,49 @@ export const settigsDataSelect = (() => {
 })();
 
 export const settigsDataInput = (() => {
-  const { likesNumber, range100 } = translator;
+  const {
+    likesNumber,
+    range999,
+    photoDelay,
+    rangePhoto,
+    tagDelay,
+    fiftyDelay,
+    rangeTag,
+    errorDelay,
+    numFullHearts,
+    rangeError
+  } = translator;
   const settigsData = {
     maxLikes: {
       label: likesNumber,
-      placeHolder: range100,
-      regex: '^0*(?:[1-9][0-9]?|100)$'
-    }
+      placeHolder: range999,
+      regex: '^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])$'//'^0*(?:[1-9][0-9]?|100)$'
+    },
+    photoDelay:  {
+      label: photoDelay,
+      placeHolder: rangePhoto,
+      regex: '^(?:[1-9]|0[1-9]|1[0-9]|2[0-9]|30)$'
+    },
+    tagDelay: {
+      label: tagDelay,
+      placeHolder: rangeTag,
+      regex: '^(?:[1-9]|0[1-9]|1[0-9]|2[0-9]|30)$'
+    },
+    fiftyDelay: {
+      label: fiftyDelay,
+      placeHolder: rangeTag,
+      regex: '^(?:[1-9]|0[1-9]|1[0-9]|2[0-9]|30)$'
+    },
+    errorDelay: {
+      label: errorDelay,
+      placeHolder: rangeError,
+      regex: '^(?:[5-9]|0[5-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]|60)$'
+    },
+    numFullHearts: {
+      label: numFullHearts,
+      placeHolder: rangeTag,
+      regex: '^(?:[1-9]|0[1-9]|1[0-9]|2[0-9]|30)$'
+    },
   }
   return settigsData;
 })();

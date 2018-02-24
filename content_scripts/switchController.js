@@ -28,7 +28,8 @@ export default class SwitchController {
   }
 
   onSwitchExplore() {
-    if(this._controller !== this.exploreController) this.switchToExploreController();
+    // if(this._controller !== this.exploreController) this.switchToExploreController();
+    this.switchToExploreController();
   }
 
   onSwitchOff() {
@@ -39,16 +40,19 @@ export default class SwitchController {
     this._controller = this.haveyController;
     this.haveyController.startController();
     this.photoController.stopController();
+    this.exploreController.stopController();
   }
 
   switchToPhotoController() {
     this._controller = this.photoController;
     this.photoController.startController();
     this.haveyController.stopController();
+    this.exploreController.stopController();
   }
 
   switchToExploreController() {
     this._controller = this.exploreController;
+    this.exploreController.startController();
     this.haveyController.stopController();
     this.photoController.stopController();
   }
