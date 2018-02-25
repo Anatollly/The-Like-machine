@@ -405,6 +405,7 @@ export default class Model {
   startNextItemFavorites() {
     try {
       const { favoriteLinks, currentFavoriteLinkNum, playFavorites, currentLink } = storage;
+      console.log('startNextItemFavorites: ', favoriteLinks, currentFavoriteLinkNum, playFavorites, currentLink);
       this.timerStartNextItemFavoritesID = setTimeout(() => {
         if (currentFavoriteLinkNum < favoriteLinks.length - 1) {
           storage.currentFavoriteLinkNum = currentFavoriteLinkNum + 1;
@@ -415,12 +416,14 @@ export default class Model {
         }
       }, this._state.settings.tagDelay * 60 * 1000)
     } catch (e) {
+      console.log('catch startNextItemFavorites');
       clearTimeout(this.timerStartNextItemFavoritesID);
       storage.resetStorage();
     }
   }
 
   startFavorites(links) {
+    console.log('startFavorites: ', links);
     storage.state = {
       playFavorites: true,
       favoriteLinks: links,

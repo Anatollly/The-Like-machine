@@ -134,11 +134,14 @@ export default class PhotoController {
               version: { todayMaxLikes }
             } = this.model.state;
             if (likeNowCounter < maxLikes && likeToday < todayMaxLikes && this.likesHeart < numFullHearts) {
+              console.log('photoController startLM: ', likeNowCounter );
               if (likeNowCounter % 50 === 0) {
+                console.log('50');
                 this.timerFiftyID = setTimeout(() => {
                   this.goToNextElement(this.onStartLM.bind(this));
                 }, fiftyDelay * 60 * 1000)
               } else if (error403) {
+                console.log('error');
                 this.timerErrorID = setTimeout(() => {
                   this.error403Off();
                   this.goToNextElement(this.onStartLM.bind(this));
