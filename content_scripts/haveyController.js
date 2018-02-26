@@ -242,21 +242,22 @@ export default class HaveyController {
         } = this.model.state;
         if (likeNowCounter < maxLikes && likeToday < todayMaxLikes) {
           if (error400) {
-           this.model.infoMessage = 'Warning! Delay 1 hours';
            this.timerDelayID = setTimeout(() => {
              this.error400Off();
              this.goToNextElement(this.onStartLM.bind(this));
+             this.model.infoMessage = `Start ${this.exploreName ? this.exploreName : ''}`;
            }, 60 * 60 * 1000)
          } else if (likeNowCounter % 50 === 0 && likeNowCounter !== 0) {
             this.model.infoMessage = `50 likes: Delay ${fiftyDelay} min`;
             this.timerDelayID = setTimeout(() => {
               this.goToNextElement(this.onStartLM.bind(this));
+              this.model.infoMessage = `Start ${this.exploreName ? this.exploreName : ''}`;
             }, fiftyDelay * 60 * 1000)
           } else if (error) {
-            this.model.infoMessage = `Warning! Delay ${errorDelay} min`;
             this.timerDelayID = setTimeout(() => {
               this.errorOff();
               this.goToNextElement(this.onStartLM.bind(this));
+              this.model.infoMessage = `Start ${this.exploreName ? this.exploreName : ''}`;
             }, errorDelay * 60 * 1000)
           } else {
             this.goToNextElement(this.onStartLM.bind(this));

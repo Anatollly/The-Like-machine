@@ -198,7 +198,7 @@ export default class Model {
   }
 
   setPopupSettings(popupData) {
-    const { elementsNodes, currentHaveyElementNum, settings, error } = this._state;
+    const { elementsNodes, currentHaveyElementNum, settings } = this._state;
     const { currentPhotoColor, viewElementColor, viewElementSwitch, viewElementPosition, pageZoom } = popupData;
     this.settings = popupData;
     chrome.runtime.sendMessage({ settingsState: this._state.settings });
@@ -355,28 +355,28 @@ export default class Model {
     const { viewElementPosition } = this._state.settings;
     this._onStyleViewElement('rgba(255,0,0,0.75)', viewElementPosition);
     this.error = true;
-    chrome.runtime.sendMessage({ error: true });
+    this.model.infoMessage = `Warning! Delay ${this.state.settings.errorDelay} min`;
   }
 
   errorOff() {
     const { viewElementColor, viewElementPosition } = this._state.settings;
     this._onStyleViewElement(viewElementColor, viewElementPosition);
     this.error = false;
-    chrome.runtime.sendMessage({ error: false });
+    this.model.infoMessage = ``;
   }
 
   error400On() {
     const { viewElementPosition } = this._state.settings;
     this._onStyleViewElement('rgba(255,0,0,0.9)', viewElementPosition);
     this.error400 = true;
-    chrome.runtime.sendMessage({ error400: true });
+    this.model.infoMessage = 'Warning! Delay 1 hours';
   }
 
   error400Off() {
     const { viewElementColor, viewElementPosition } = this._state.settings;
     this._onStyleViewElement(viewElementColor, viewElementPosition);
     this.error400 = false;
-    chrome.runtime.sendMessage({ error400: false });
+    this.model.infoMessage = ``;
   }
 
   switchOnLM() {
@@ -426,6 +426,7 @@ export default class Model {
         storage.currentFavoriteLinkNum = currentFavoriteLinkNum + 1;
         const currentLink = favoriteLinks[currentFavoriteLinkNum + 1];
         storage.currentLink = currentLink;
+        this.model.infoMessage = `Waiting for next tag: ${this.state.settings.tagDelay} min`;
         this.timerStartNextItemFavoritesID = setTimeout(() => {
           this.clickInstagramLink(currentLink);
         }, this._state.settings.tagDelay * 60 * 1000);
