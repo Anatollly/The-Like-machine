@@ -236,17 +236,26 @@ export default class HaveyController {
           settings: { maxLikes, fiftyDelay, errorDelay },
           counter: { likeToday },
           likeNowCounter,
-          error403,
+          error,
+          error400,
           version: { todayMaxLikes }
         } = this.model.state;
         if (likeNowCounter < maxLikes && likeToday < todayMaxLikes) {
-          if (likeNowCounter % 50 === 0) {
-            this.timerFiftyID = setTimeout(() => {
+          if (error400) {
+           this.model.infoMessage = 'Warning! Delay 1 hours';
+           this.timerDelayID = setTimeout(() => {
+             this.error400Off();
+             this.goToNextElement(this.onStartLM.bind(this));
+           }, 60 * 60 * 1000)
+         } else if (likeNowCounter % 50 === 0 && likeNowCounter !== 0) {
+            this.model.infoMessage = `50 likes: Delay ${fiftyDelay} min`;
+            this.timerDelayID = setTimeout(() => {
               this.goToNextElement(this.onStartLM.bind(this));
             }, fiftyDelay * 60 * 1000)
-          } else if (error403) {
-            this.timerErrorID = setTimeout(() => {
-              this.error403Off();
+          } else if (error) {
+            this.model.infoMessage = `Warning! Delay ${errorDelay} min`;
+            this.timerDelayID = setTimeout(() => {
+              this.errorOff();
               this.goToNextElement(this.onStartLM.bind(this));
             }, errorDelay * 60 * 1000)
           } else {
@@ -264,24 +273,25 @@ export default class HaveyController {
       this.play = true;
       this.ignoreKeyboard();
       this.onStartLM();
+      this.model.infoMessage = 'Start';
     }
   }
 
   pauseLM() {
     this.play = false;
     clearTimeout(this.likePhotoTimerID);
-    clearTimeout(this.timerFiftyID);
-    clearTimeout(this.timerErrorID);
+    clearTimeout(this.timerDelayID);
     this.addListKeyboard();
+    this.model.infoMessage = 'Pause';
   }
 
   stopLM() {
     this.play = false;
     clearTimeout(this.likePhotoTimerID);
-    clearTimeout(this.timerFiftyID);
-    clearTimeout(this.timerErrorID);
+    clearTimeout(this.timerDelayID);
     this.addListKeyboard();
     this.model.resetLikeNowCounter();
+    this.model.infoMessage = 'Stop';
   }
 
   onClickSpace(e) {
@@ -433,8 +443,7 @@ export default class HaveyController {
     clearInterval(this.scrollID);
     clearTimeout(this.timerSpaceID);
     clearInterval(this.haveyTimerID);
-    clearTimeout(this.timerFiftyID);
-    clearTimeout(this.timerErrorID);
+    clearTimeout(this.timerDelayID);
   }
 
   restartController() {

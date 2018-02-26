@@ -5,6 +5,7 @@ export default class PhotoController {
   constructor(model) {
     this.model = model;
     this.likesHeart = 0;
+    this.exploreName = '';
   }
 
   get wrapElement() {
@@ -29,6 +30,7 @@ export default class PhotoController {
           this.openCount += 1;
           if (this.openCount > 100)  clearInterval(this.openPostTimerID);
           if (this.wrapElement && elementData(this.articleElement).postLink === postName) {
+            const { start, pause, stop, name } = this.model.state.remotePhoto;
             !this.play && this.addListKeyboard();
             clearInterval(this.openPostTimerID);
             this.currentNodes = this.elementNodes;
@@ -42,9 +44,10 @@ export default class PhotoController {
             this.leftArrow = elementData(this.currentNodes.element).leftArrow;
             this.onOpenPost && this.onOpenPost(postName);
             this.openingPost = false;
-            if (this.model.state.remotePhoto.start) this.startLM();
-            if (this.model.state.remotePhoto.pause) this.pauseLM();
-            if (this.model.state.remotePhoto.stop) this.stopLM();
+            if (name) this.exploreName = name;
+            if (start) this.startLM();
+            if (pause) this.pauseLM();
+            if (stop) this.stopLM();
           }
         }, 300);
       } catch (e) {
@@ -100,23 +103,31 @@ export default class PhotoController {
     } else {
       this.likesHeart += 1;
     }
-    console.log('likesHeart: ', this.likesHeart);
   }
 
   goToNextElement(callback) {
-    this.onOpenPost = () => {
-      this.onOpenPost = null;
-      callback && callback();
-    };
-    this.rightArrow.click();
+    try {
+      this.onOpenPost = () => {
+        this.onOpenPost = null;
+        callback && callback();
+      };
+      this.rightArrow.click();
+    } catch (e) {
+      this.stopLM();
+    }
   }
 
   goToPrevElement(callback) {
-    this.onOpenPost = () => {
-      this.onOpenPost = null;
-      callback && callback();
-    };
-    this.leftArrow.click();
+    try {
+      this.onOpenPost = () => {
+        this.onOpenPost = null;
+        callback && callback();
+      };
+      this.leftArrow.click();
+    } catch (e) {
+      this.stopLM();
+    }
+
   }
 
   onStartLM() {
@@ -130,20 +141,26 @@ export default class PhotoController {
               settings: { maxLikes, fiftyDelay, errorDelay, numFullHearts },
               counter: { likeToday },
               likeNowCounter,
-              error403,
+              error,
+              error400,
               version: { todayMaxLikes }
             } = this.model.state;
             if (likeNowCounter < maxLikes && likeToday < todayMaxLikes && this.likesHeart < numFullHearts) {
-              console.log('photoController startLM: ', likeNowCounter );
-              if (likeNowCounter % 50 === 0) {
-                console.log('50');
-                this.timerFiftyID = setTimeout(() => {
+              if (error400) {
+               this.model.infoMessage = 'Warning! Delay 1 hours';
+               this.timerDelayID = setTimeout(() => {
+                 this.error400Off();
+                 this.goToNextElement(this.onStartLM.bind(this));
+               }, 60 * 60 * 1000)
+             } else if (likeNowCounter % 50 === 0 && likeNowCounter !== 0) {
+                this.model.infoMessage = `50 likes: Delay ${fiftyDelay} min`;
+                this.timerDelayID = setTimeout(() => {
                   this.goToNextElement(this.onStartLM.bind(this));
                 }, fiftyDelay * 60 * 1000)
-              } else if (error403) {
-                console.log('error');
-                this.timerErrorID = setTimeout(() => {
-                  this.error403Off();
+              } else if (error) {
+                this.model.infoMessage = `Warning! Delay ${errorDelay} min`;
+                this.timerDelayID = setTimeout(() => {
+                  this.errorOff();
                   this.goToNextElement(this.onStartLM.bind(this));
                 }, errorDelay * 60 * 1000)
               } else {
@@ -157,36 +174,36 @@ export default class PhotoController {
         }, photoDelay * 1000);
       }
     } catch (e) {
-      console.log('errrrrprproro');
     }
   }
 
   startLM() {
     if (!this.play) {
+      this.model.infoMessage = `Start ${this.exploreName}`;
       this.play = true;
       this.onStartLM();
       this.ignoreKeyboard();
-      this.model.remotePhoto = { start: false, pause: false, stop: false};
+      this.model.remotePhoto = { start: false, pause: false, stop: false, name: '' };
     }
   }
 
   pauseLM() {
     this.play = false;
+    this.model.infoMessage = 'Pause';
     clearTimeout(this.likePhotoTimerID);
-    clearTimeout(this.timerErrorID);
-    clearTimeout(this.timerFiftyID);
+    clearTimeout(this.timerDelayID);
     this.addListKeyboard();
-    this.model.remotePhoto = { start: false, pause: false, stop: false};
+    this.model.remotePhoto = { start: false, pause: false, stop: false, name: '' };
   }
 
   stopLM() {
     this.play = false;
+    this.model.infoMessage = 'Stop';
     clearTimeout(this.likePhotoTimerID);
-    clearTimeout(this.timerErrorID);
-    clearTimeout(this.timerFiftyID);
+    clearTimeout(this.timerDelayID);
     this.model.resetLikeNowCounter();
     this.addListKeyboard();
-    this.model.remotePhoto = { start: false, pause: false, stop: false};
+    this.model.remotePhoto = { start: false, pause: false, stop: false, name: '' };
   }
 
   onClickSpace(e) {
@@ -284,8 +301,7 @@ export default class PhotoController {
     this.onOpenPost = null;
     clearInterval(this.openPostTimerID);
     clearTimeout(this.likePhotoTimerID);
-    clearTimeout(this.timerErrorID);
-    clearTimeout(this.timerFiftyID);
+    clearTimeout(this.timerDelayID);
     this.model.resetLikeNowCounter();
     this.removeListKeyboard();
     this.element && this.removeListElement(this.element)

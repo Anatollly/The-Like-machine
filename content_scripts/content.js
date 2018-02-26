@@ -38,35 +38,38 @@ const setAccount = (path, controller) => {
 
 
 const handUrl = (url, controller) => {
-  const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/);
-  const postName = href[0];
-  const path = href[1];
-  const { currentLink, playFavorites } = storage.state;
-  switch (path) {
-    case '':
-      controller.onSwitchHavey();
-      controller.model.currentTag = { type: 'photos', name: '', link: '' };
-      break;
-    case 'p':
-      controller.onSwitchPhoto(postName);
-      controller.model.currentTag = { type: 'photos', name: '', link: postName };
-      break;
-    case 'explore':
-      controller.onSwitchExplore();
-      setLocationsAndTags(postName, controller);
-      if (postName === currentLink && playFavorites) {
-        storage.currentLink = '';
-        controller.controller.startLM();
-      }
-      break;
-    default:
-      controller.onSwitchOff();
-      setAccount(postName, controller);
+  if ((/^https:\/\/www\.instagram\.com.*$/).test(url)) {
+    const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/);
+    const postName = href[0];
+    const path = href[1];
+    const { currentLink, playFavorites } = storage.state;
+    switch (path) {
+      case '':
+        controller.onSwitchHavey();
+        controller.model.currentTag = { type: 'photos', name: '', link: '' };
+        break;
+      case 'p':
+        controller.onSwitchPhoto(postName);
+        controller.model.currentTag = { type: 'photos', name: '', link: postName };
+        break;
+      case 'explore':
+        setLocationsAndTags(postName, controller);
+        controller.onSwitchExplore();
+        if (postName === currentLink && playFavorites) {
+          storage.currentLink = '';
+          controller.controller.startLM();
+        }
+        break;
+      default:
+        controller.onSwitchOff();
+        setAccount(postName, controller);
+    }
   }
 };
 
 const handClick = (click, controller, model) => {
-  controller && controller.model.error403Off();
+  controller && controller.model.errorOff();
+  controller && controller.model.error400Off();
   switch (click) {
     case 'start':
       controller && controller.startLM();
@@ -90,9 +93,6 @@ const handClick = (click, controller, model) => {
     case 'saveTag':
       controller && model.saveFavorites();
       break;
-    case 'zeroCounter':
-      controller &&  model.resetTodayCounter();
-      break;
     default:
   }
 };
@@ -110,14 +110,8 @@ const getProfile = () => {
     const profile = document.querySelector('.coreSpriteDesktopNavProfile').href;
     return profile.match(/^https:\/\/www.instagram.com\/([^\/]*)\/$/)[1];
   } catch (e) {
-    // console.log('no profile');
   }
 }
-
-// const handError403 = (controller) => {
-//   controller.stopLM();
-//   controller.model.error403On();
-// }
 
 const loadAccountData = (data, globalData, account) => {
   const controller = new SwitchController(data, globalData, account);
@@ -135,11 +129,14 @@ const loadAccountData = (data, globalData, account) => {
       machineSwitch,
       popupInitState,
       popupChangeSettings,
+      saveSettings,
+      cancelSettings,
       popupResetSettings,
       viewElementSwitch,
       link,
       deleteTag,
       error,
+      error400,
       favoritesLinks
     } = message;
 
@@ -148,11 +145,14 @@ const loadAccountData = (data, globalData, account) => {
     if (maxLikes) handMaxLikes(maxLikes, controller.model);
     if (popupInitState) controller.model.setInitPopupState();
     if (popupChangeSettings) controller.model.setPopupSettings(popupChangeSettings);
+    if (saveSettings) controller.model.infoMessage = 'Save settings';
+    if (cancelSettings) controller.model.infoMessage = 'Cancel settings';
     if (popupResetSettings) controller.model.resetPopupSettings();
     if (viewElementSwitch) handViewElementSwitch(viewElementSwitch, controller.model);
     if (link) controller.model.clickInstagramLink(link);
     if (deleteTag) controller.model.delFavoriteTag(deleteTag.type, deleteTag.name);
-    if (error) controller.model.error403On(); // handError403(controller.controller);
+    if (error) controller.model.errorOn();
+    if (error400) controller.model.error400On();
     if (favoritesLinks) controller.model.startFavorites(favoritesLinks);
   });
   chrome.runtime.sendMessage({ status: 'onload' });

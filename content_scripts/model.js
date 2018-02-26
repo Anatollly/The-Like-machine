@@ -1,6 +1,7 @@
 import elementData from './elementData';
 import moment from 'moment';
 import storage from './storage';
+import parse from 'url-parse';
 
 import {
   initialState,
@@ -14,12 +15,10 @@ import {
   addElementNodes,
   delElementNodes,
   setCurrentHaveyElementNum,
-  setCurrentFavoriteLinkNum,
   setCurrentElement,
-  // setPlayPhoto,
   setRemotePhoto,
-  setPlayFavorites,
-  setError403,
+  setError,
+  setError400,
   setOnOffLm,
   setLikeNowCounter,
   setFavorites,
@@ -31,7 +30,7 @@ import {
   setDateLikeTodayData,
   setTodayMaxLikesData,
   setMaxFavoritesData,
-  setFavoriteLinks
+  setInfoMessage
 } from './data';
 
 import {
@@ -128,20 +127,12 @@ export default class Model {
     this._state = setRemotePhoto(this._state, remotePhoto);
   }
 
-  // set playFavorites(playFavorites) {
-  //   this._state = setPlayFavorites(this._state, playFavorites);
-  // }
+  set error(error) {
+    this._state = setError(this._state, error);
+  }
 
-  // set favoriteLinks(favoriteLinks) {
-  //   this._state = setFavoriteLinks(this._state, favoriteLinks);
-  // }
-
-  // set currentFavoriteLinkNum(currentFavoriteLinkNum) {
-  //   this._state = setCurrentFavoriteLinkNum(this._state, currentFavoriteLinkNum);
-  // }
-
-  set error403(error403) {
-    this._state = setError403(this._state, error403);
+  set error400(error400) {
+    this._state = setError400(this._state, error400);
   }
 
   set LMOn(LMOn) {
@@ -150,6 +141,11 @@ export default class Model {
 
   set currentTag(currentTag) {
     this._state = setCurrentTag(this._state, currentTag);
+  }
+
+  set infoMessage(infoMessage) {
+    this._state = setInfoMessage(this._state, infoMessage);
+    chrome.runtime.sendMessage({ infoMessage });
   }
 
   setLimit() {
@@ -193,15 +189,16 @@ export default class Model {
     }
     localStorage.getItem('LMOn') === 'true' ? this.switchOnLM() : this.switchOffLM();
     this._onLikeNow(0);
+    this.infoMessage = `Hello ${this.account}!`;
   }
 
   setInitPopupState() {
-    const { settings, favorites, error403, LMOn } = this._state;
-    chrome.runtime.sendMessage({ settingsState: settings, favoritesState: favorites, error403, LMOn });
+    const { settings, favorites, LMOn, infoMessage } = this._state;
+    chrome.runtime.sendMessage({ settingsState: settings, favoritesState: favorites, LMOn, infoMessage });
   }
 
   setPopupSettings(popupData) {
-    const { elementsNodes, currentHaveyElementNum, settings, error403 } = this._state;
+    const { elementsNodes, currentHaveyElementNum, settings, error } = this._state;
     const { currentPhotoColor, viewElementColor, viewElementSwitch, viewElementPosition, pageZoom } = popupData;
     this.settings = popupData;
     chrome.runtime.sendMessage({ settingsState: this._state.settings });
@@ -231,6 +228,7 @@ export default class Model {
     chrome.runtime.sendMessage({ pageZoom });
     const currentNodes = elementsNodes[currentHaveyElementNum];
     currentNodes && handleCurrentElement(currentNodes.element, currentPhotoColor);
+    this.infoMessage = 'Reset settings';
   }
 
   setCurrentHaveyElNum(num) {
@@ -260,8 +258,8 @@ export default class Model {
         this.favorites = this._state.favorites;
         chrome.runtime.sendMessage({ favoritesState: this._state.favorites });
       }
+      this.infoMessage = `\"${decodeURI(name)}\" added to ${type}`;
     } catch (e) {
-      console.log('save favorites fail');
     }
   }
 
@@ -342,24 +340,43 @@ export default class Model {
 
   saveImage() {
     const src = elementData(this._state.currentElement).imageSrc;
-    const link = document.createElement("a");
-    link.setAttribute("href", src);
-    link.setAttribute("download", "new-image-name.jpg");
-    link.click();
+    if (src) {
+      const link = document.createElement("a");
+      link.setAttribute("href", src);
+      link.setAttribute("download", "new-image-name.jpg");
+      link.click();
+      this.infoMessage = 'Photo downloaded';
+    } else {
+      this.infoMessage = 'No photo';
+    }
   }
 
-  error403On() {
+  errorOn() {
     const { viewElementPosition } = this._state.settings;
     this._onStyleViewElement('rgba(255,0,0,0.75)', viewElementPosition);
-    this.error403 = true;
-    chrome.runtime.sendMessage({ error403: true });
+    this.error = true;
+    chrome.runtime.sendMessage({ error: true });
   }
 
-  error403Off() {
+  errorOff() {
     const { viewElementColor, viewElementPosition } = this._state.settings;
     this._onStyleViewElement(viewElementColor, viewElementPosition);
-    this.error403 = false;
-    chrome.runtime.sendMessage({ error403: false });
+    this.error = false;
+    chrome.runtime.sendMessage({ error: false });
+  }
+
+  error400On() {
+    const { viewElementPosition } = this._state.settings;
+    this._onStyleViewElement('rgba(255,0,0,0.9)', viewElementPosition);
+    this.error400 = true;
+    chrome.runtime.sendMessage({ error400: true });
+  }
+
+  error400Off() {
+    const { viewElementColor, viewElementPosition } = this._state.settings;
+    this._onStyleViewElement(viewElementColor, viewElementPosition);
+    this.error400 = false;
+    chrome.runtime.sendMessage({ error400: false });
   }
 
   switchOnLM() {
@@ -404,32 +421,33 @@ export default class Model {
 
   startNextItemFavorites() {
     try {
-      const { favoriteLinks, currentFavoriteLinkNum, playFavorites, currentLink } = storage;
-      console.log('startNextItemFavorites: ', favoriteLinks, currentFavoriteLinkNum, playFavorites, currentLink);
-      this.timerStartNextItemFavoritesID = setTimeout(() => {
-        if (currentFavoriteLinkNum < favoriteLinks.length - 1) {
-          storage.currentFavoriteLinkNum = currentFavoriteLinkNum + 1;
-          storage.currentLink = favoriteLinks[currentFavoriteLinkNum + 1];
-          this.clickInstagramLink(favoriteLinks[currentFavoriteLinkNum + 1]);
-        } else {
-          storage.resetStorage();
-        }
-      }, this._state.settings.tagDelay * 60 * 1000)
+      const { favoriteLinks, currentFavoriteLinkNum } = storage;
+      if (currentFavoriteLinkNum < favoriteLinks.length - 1) {
+        storage.currentFavoriteLinkNum = currentFavoriteLinkNum + 1;
+        const currentLink = favoriteLinks[currentFavoriteLinkNum + 1];
+        storage.currentLink = currentLink;
+        this.timerStartNextItemFavoritesID = setTimeout(() => {
+          this.clickInstagramLink(currentLink);
+        }, this._state.settings.tagDelay * 60 * 1000);
+      } else {
+        storage.resetStorage();
+        this.infoMessage = 'Stop: Favorites link';
+      }
     } catch (e) {
-      console.log('catch startNextItemFavorites');
+      this.infoMessage = 'Error: Favorites link';
       clearTimeout(this.timerStartNextItemFavoritesID);
       storage.resetStorage();
     }
   }
 
   startFavorites(links) {
-    console.log('startFavorites: ', links);
     storage.state = {
       playFavorites: true,
       favoriteLinks: links,
       currentFavoriteLinkNum: 0,
       currentLink: links[0]
     }
+    this.infoMessage = 'Start: Favorites link';
     this.clickInstagramLink(links[0]);
   }
 }

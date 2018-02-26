@@ -5,6 +5,7 @@ export default class ExploreController {
   constructor(model) {
     this.model = model;
     this.model.onStartItemFavorites = this.startLM.bind(this);
+    this.name = '';
   }
 
   get haveyElement() {
@@ -40,15 +41,13 @@ export default class ExploreController {
 
   startLM() {
     try {
-      console.log('ExploreController startLM');
       let n = 0;
       this.timerStartID = setInterval(() => {
-        console.log('ExploreController interval');
         n += 1;
         if (this.haveyElement) {
+          const { remotePhoto, settings: { skipTheBest }, currentTag: { name } } = this.model.state;
           clearInterval(this.timerStartID);
-          const skipTheBest = this.model.state.settings.skipTheBest;
-          this.model.remotePhoto = { start: true, pause: false, stop: false};
+          this.model.remotePhoto = { start: true, pause: false, stop: false, name: this.name };
           !skipTheBest && this.firstBestPhoto ? this.firstBestPhoto.click() : this.firstNewPhoto.click();
         }
         if (n > 100) clearInterval(timerStartID);
@@ -56,25 +55,26 @@ export default class ExploreController {
     } catch (e) {
       clearInterval(this.timerStartID);
       this.model.playFavorites = false;
-      this.model.remotePhoto = { start: false, pause: false, stop: false};
+      this.model.remotePhoto = { start: false, pause: false, stop: false, name: '' };
     }
   }
 
   pauseLM() {
-    this.model.remotePhoto = { start: false, pause: true, stop: false};
+    this.model.remotePhoto = { start: false, pause: true, stop: false, name: this.name };
   }
 
   stopLM() {
-    this.model.remotePhoto = { start: false, pause: false, stop: true};
+    this.model.remotePhoto = { start: false, pause: false, stop: true, name: this.name };
   }
 
   startController() {
-    console.log('startController ExploreController: ');
-    // storage.playFavorites && this.startLM();
+    const { currentTag: { name } } = this.model.state;
+    this.name = name;
+    this.model.remotePhoto = { start: false, pause: false, stop: false, name };
   }
 
   stopController() {
-    console.log('stop ExploreController');
+
   }
 
 }

@@ -4,7 +4,6 @@ class FavoritesLinkView {
   constructor(data, index, dataCheckBoxes) {
     this.data = data;
     this.index = index;
-    console.log('constructor: ', dataCheckBoxes);
     this.dataCheckBoxes = dataCheckBoxes;
   }
 

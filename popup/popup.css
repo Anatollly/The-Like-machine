@@ -82,8 +82,8 @@ body {
   position: absolute;
   width: 70px;
   height: 31px;
-  top: 155px;
-  left: 3px;
+  top: 154px;
+  left: 4px;
 }
 
 #manual {
@@ -91,4 +91,9 @@ body {
   width: 100%;
   height: 100%;
   padding: 15px;
+}
+
+.info-message {
+  height: 50px;
+  margin: 5px 30px 10px 30px;
 }
