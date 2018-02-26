@@ -4,7 +4,7 @@
     "name": "Like machine",
     "description": "The extension that will make you popular in the Instagram",
     "default_locale": "ru",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "short_name": "The extension for Instagram",
     "icons": {
             "16": "images/LM16.png",
@@ -36,5 +36,6 @@
     "browser_action": {
           "default_title": "Like-machine",
           "default_popup": "popup/popup.html"
-    }
+    },
+    "content_security_policy":"script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
 }

@@ -92,32 +92,27 @@ window.onload = () => {
   const hiddenLayer = document.querySelector('.hidden-layer');
   const settingsTab = document.querySelector('.settings-element');
   const btnGroupMain = document.querySelector('.lm--btn-main');
-  const btnGroupAdd = document.querySelector('.lm--btn-add');
   const save = document.querySelector('.lm--button-save');
   const cancel = document.querySelector('.lm--button-cancel');
   const reset = document.querySelector('.lm--button-reset');
   const settings = document.querySelector('.lm--tab-settings');
   const favorites = document.querySelector('.lm--tab-favorites');
   const manual = document.querySelector('.lm--tab-manual');
-  // const additionally = document.querySelector('.lm--tab-additionally');
   const startBtn = btnGroupMain.querySelector('.lm--button-start');
   const pauseBtn = btnGroupMain.querySelector('.lm--button-pause');
   const stopBtn = btnGroupMain.querySelector('.lm--button-stop');
-  const onBtn = btnGroupAdd.querySelector('.lm--button-on');
-  const topBtn = btnGroupAdd.querySelector('.lm--button-top');
-  const downloadBtn = btnGroupAdd.querySelector('.lm--button-download');
-  const saveTagBtn = btnGroupAdd.querySelector('.lm--button-saveTag');
+  const onBtn = btnGroupMain.querySelector('.lm--button-on');
+  const topBtn = btnGroupMain.querySelector('.lm--button-top');
+  const downloadBtn = btnGroupMain.querySelector('.lm--button-download');
+  const saveTagBtn = btnGroupMain.querySelector('.lm--button-saveTag');
   const startFavoritesBtn = document.querySelector('.lm--button-startFavorite');
-  console.log('startFavoritesBtn: ', startFavoritesBtn);
-  // const zeroCounterBtn = btnGroupAdd.querySelector('.lm--button-zeroCounter');
   const favoritesTab = document.querySelector('.favorites-element');
-  const infoText = document.querySelector('.info-text');
+  const infoMessageText = document.querySelector('.info-message');
 
   // listening incoming messages
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    const { settingsState, favoritesState, error403, LMOn } = message;
+    const { settingsState, favoritesState, LMOn, infoMessage } = message;
     if (settingsState) {
-      console.log('settingsState: ', settingsState);
       popupData['settingsData'] = settingsState;
       popupData['settingsElement'] = getSettingsElements(settingsState);
       changeElementLang({ save, cancel, reset, settings, favorites, manual,
@@ -126,11 +121,7 @@ window.onload = () => {
       showSettingsElements(settingsTab, popupData.settingsElement, settingsState);
     }
     if (favoritesState) showTags(favoritesState, favoritesTab);
-    if (error403) {
-      infoText.innerHTML = 'Too much activity';
-    } else {
-      infoText.innerHTML = '';
-    }
+    if (infoMessage) infoMessageText.innerHTML = infoMessage;
     if (LMOn === false) {
       hiddenLayer.style = 'bottom: 0;'
       onBtn.innerHTML = 'On';
@@ -143,40 +134,42 @@ window.onload = () => {
 
   save.addEventListener('click', () => {
     const { settingsData, settingsElement } = popupData;
-    sendMessageToContent({ popupChangeSettings: getSettingsValue(settingsElement, settingsData) });
+    sendMessageToContent({ popupChangeSettings: getSettingsValue(settingsElement, settingsData), saveSettings: true });
   })
 
   cancel.addEventListener('click', () => {
-    sendMessageToContent({ popupChangeSettings: popupData.settingsData });
+    sendMessageToContent({ popupChangeSettings: popupData.settingsData, cancelSettings: true });
   })
 
   reset.addEventListener('click', () => {
     sendMessageToContent({ popupResetSettings: true });
   })
 
-  startFavoritesBtn.addEventListener('click', () => {
-    const checkBoxesValues = favoritesTab.querySelectorAll('.form-check-input');
-    const dataCheckBoxes = [];
-    checkBoxesValues.forEach((item, i) => {
-      if (item.checked) dataCheckBoxes.push(item.value);
-    });
-    localStorage.setItem('dataCheckBoxes', dataCheckBoxes);
-    sendMessageToContent({ favoritesLinks: dataCheckBoxes });
+  favoritesTab.addEventListener('click', (e) => {
+    if (e.target.nodeName === 'INPUT') {
+      const checkBoxesValues = favoritesTab.querySelectorAll('.form-check-input');
+      const dataCheckBoxes = [];
+      checkBoxesValues.forEach((item, i) => {
+        if (item.checked) dataCheckBoxes.push(item.value);
+      });
+      localStorage.setItem('dataCheckBoxes', dataCheckBoxes);
+    };
   })
 
-  // listening click elements
+  startFavoritesBtn.addEventListener('click', (e) => {
+    const dataCheckBoxesStorage = localStorage.getItem('dataCheckBoxes');
+    const dataCheckBoxes = dataCheckBoxesStorage && dataCheckBoxesStorage.split(',');
+    sendMessageToContent({favoritesLinks: dataCheckBoxes});
+  })
+
   btnGroupMain.addEventListener('click', (e) => {
+    if (e.target === onBtn) sendMessageToContent({click: 'on'});
+    if (e.target === topBtn) sendMessageToContent({click: 'top'});
     if (e.target === startBtn) sendMessageToContent({click: 'start'});
     if (e.target === pauseBtn) sendMessageToContent({click: 'pause'});
     if (e.target === stopBtn) sendMessageToContent({click: 'stop'});
-  })
-
-  btnGroupAdd.addEventListener('click', (e) => {
-    if (e.target === onBtn) sendMessageToContent({click: 'on'});
-    if (e.target === topBtn) sendMessageToContent({click: 'top'});
     if (e.target === downloadBtn) sendMessageToContent({click: 'download'});
     if (e.target === saveTagBtn) sendMessageToContent({click: 'saveTag'});
-    // if (e.target === zeroCounterBtn) sendMessageToContent({click: 'zeroCounter'});
   })
 
   // request initial state

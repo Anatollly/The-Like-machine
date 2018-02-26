@@ -8,9 +8,11 @@ chrome.webRequest.onCompleted.addListener(function(responseHeaders) {
   const statusCode = responseHeaders.statusCode;
   if(statusCode >= 400 && statusCode < 500) {
     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        error: true
-      }, () => {});
+      if (statusCode === 400) {
+        chrome.tabs.sendMessage(tabs[0].id, { error400: true }, () => {});
+      } else {
+        chrome.tabs.sendMessage(tabs[0].id, { error: true }, () => {});
+      }
     });
   }
 }, {urls: ["<all_urls>"]},

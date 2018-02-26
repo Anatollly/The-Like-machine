@@ -10,20 +10,17 @@
   <body>
     <div class="hidden-layer"></div>
     <div class="container-fluid buttons-area">
-      <div class="btn-group btn-group d-flex justify-content-center lm--btn-add" style="margin: 15px 0" role="group" aria-label="Basic example">
+      <div class="btn-group btn-group btn-group-sm d-flex justify-content-center lm--btn-main" style="margin: 15px 0" role="group" aria-label="Basic example">
         <button type="button" class="btn btn-secondary lm--button-on" style="z-index: 1001">On</button>
         <button type="button" class="btn btn-secondary lm--button-top">Top</button>
+        <button type="button" class="btn btn-danger lm--button-start">Start</button>
+        <button type="button" class="btn btn-danger lm--button-pause">Pause</button>
+        <button type="button" class="btn btn-danger lm--button-stop">Stop</button>
         <button type="button" class="btn btn-secondary lm--button-download">Download</button>
         <button type="button" class="btn btn-secondary lm--button-saveTag">##</button>
-        <!-- <button type="button" class="btn btn-secondary lm--button-zeroCounter">00</button> -->
       </div>
     </div>
-    <div class="btn-group btn-group d-flex justify-content-center lm--btn-main" style="margin: 15px 0" role="group" aria-label="Basic example">
-      <button type="button" class="btn btn-danger lm--button-start">Start</button>
-      <button type="button" class="btn btn-danger lm--button-pause">Pause</button>
-      <button type="button" class="btn btn-danger lm--button-stop">Stop</button>
-    </div>
-    <p class="text-justify text-center text-danger info-text" style="margin: 0"></p>
+    <p class="text-justify text-left text-danger info-message"></p>
     <ul class="nav nav-tabs" id="myTab" role="tablist">
       <li class="nav-item">
         <a class="nav-link lm--tab active lm--tab-settings" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="home" aria-selected="true">Настройки</a>
