@@ -1,7 +1,12 @@
 import elementData from './elementData';
 
 import scrollToEl from 'scroll-to-element';
-//import ScrollEvents from 'scroll-events';
+import {
+  checkTodayLikes,
+  checkFullHearts,
+  checkLikes,
+  checkError
+} from './util';
 
 export default class HaveyController {
   constructor(model) {
@@ -196,28 +201,6 @@ export default class HaveyController {
     }, 50)
   }
 
-  likeElement(elementNodes) {
-    const image = elementData(elementNodes.element).dblclickImageElement;
-    const heart = elementNodes.heartElement;
-    image ? image.dispatchEvent(new MouseEvent('dblclick', {'bubbles': true})) : heart.click();
-  }
-
-  unlikeElement(elementNodes) {
-    elementNodes.heartElement.click();
-  }
-
-  clickCurrentElement() {
-    const { currentNodes } = this;
-    const heartFull = elementData(currentNodes.element).heartFull;
-    heartFull ? this.unlikeElement(currentNodes) : this.likeElement(currentNodes);
-  }
-
-  likeCurrentElement() {
-    const { currentNodes } = this;
-    const heartFull = elementData(currentNodes.element).heartFull;
-    !heartFull && this.likeElement(currentNodes);
-  }
-
   goToNextElement(callback) {
     const { nextNodes } = this;
     if (nextNodes) {
@@ -228,50 +211,93 @@ export default class HaveyController {
   }
 
   onStartLM() {
-    const photoDelay = this.model.state.settings.photoDelay;
-    if (this.play) {
-      this.likeCurrentElement();
-      this.likePhotoTimerID = setTimeout(() => {
-        const {
-          settings: { maxLikes, fiftyDelay, errorDelay },
-          counter: { likeToday },
-          likeNowCounter,
-          error,
-          error400,
-          version: { todayMaxLikes }
-        } = this.model.state;
-        if (likeNowCounter < maxLikes && likeToday < todayMaxLikes) {
-          if (error400) {
-           this.timerDelayID = setTimeout(() => {
-             this.error400Off();
-             this.goToNextElement(this.onStartLM.bind(this));
-             this.model.infoMessage = `Start ${this.exploreName ? this.exploreName : ''}`;
-           }, 60 * 60 * 1000)
-         } else if (likeNowCounter % 50 === 0 && likeNowCounter !== 0) {
+    const {
+      settings: { maxLikes, fiftyDelay, errorDelay, numFullHearts, photoDelay },
+      counter: { likeToday },
+      fullHearts,
+      likeNowCounter,
+      error,
+      error400,
+      version: { todayMaxLikes }
+    } = this.model.state;
+    checkTodayLikes(likeToday, todayMaxLikes)
+      .then(() => {
+        return new Promise((resolve, reject) => {
+          this.likePhotoTimerID = setTimeout(() => {
+           this.model.likeCurrentElement();
+           resolve();
+         }, photoDelay * 1000);
+        })
+      })
+      .then(() => {
+        return checkFullHearts(fullHearts, numFullHearts);
+      })
+      .then(() => {
+        return checkLikes(likeNowCounter, maxLikes);
+      })
+      .then(() => {
+        return checkError(error400, error);
+      })
+      .then(() => {
+        return new Promise((resolve, reject) => {
+          this.likePhotoTimerID = setTimeout(() => {
+            this.goToNextElement(this.onStartLM.bind(this));
+            resolve();
+          }, 800);
+        })
+      })
+      .catch((message) => {
+        switch (message) {
+          case 'limitLikes':
+            this.stopLM();
+            this.model.infoMessage = `You have reached the limit of likes for today (maximum ${todayMaxLikes} likes)`;
+            break;
+          case 'fullHearts':
+            this.stopLM();
+            this.model.infoMessage = `${numFullHearts} full hearts in a row`;
+            break;
+          case '50likes':
+            this.pauseLM();
             this.model.infoMessage = `50 likes: Delay ${fiftyDelay} min`;
             this.timerDelayID = setTimeout(() => {
               this.goToNextElement(this.onStartLM.bind(this));
               this.model.infoMessage = `Start ${this.exploreName ? this.exploreName : ''}`;
-            }, fiftyDelay * 60 * 1000)
-          } else if (error) {
+            }, 10000); //fiftyDelay * 60 * 1000);
+            break;
+          case 'maxLikes':
+            this.stopLM();
+            this.model.infoMessage = `You have reached ${maxLikes} likes`;
+            break;
+          case 'error400':
+            this.pauseLM();
+            this.model.infoMessage = 'Warning! Delay 1 hours';
+            this.timerDelayID = setTimeout(() => {
+              this.model.error400Off();
+              this.goToNextElement(this.onStartLM.bind(this));
+              this.model.infoMessage = `Start ${this.exploreName ? this.exploreName : ''}`;
+            }, 60 * 60 * 1000);
+            break;
+          case 'error':
+            this.pauseLM();
+            this.model.infoMessage = `Warning! Delay ${this.state.settings.errorDelay} min`;
             this.timerDelayID = setTimeout(() => {
               this.errorOff();
               this.goToNextElement(this.onStartLM.bind(this));
               this.model.infoMessage = `Start ${this.exploreName ? this.exploreName : ''}`;
-            }, errorDelay * 60 * 1000)
-          } else {
-            this.goToNextElement(this.onStartLM.bind(this));
-          }
-        } else {
-          this.stopLM();
+            }, errorDelay * 60 * 1000);
+            break;
+          default:
+            this.stopLM();
+            this.model.infoMessage = `error`;
         }
-      }, photoDelay * 1000);
-    }
+      })
   }
+
 
   startLM() {
     if (!this.play) {
       this.play = true;
+      this.model.fullHearts = 0;
       this.ignoreKeyboard();
       this.onStartLM();
       this.model.infoMessage = 'Start';
@@ -288,6 +314,7 @@ export default class HaveyController {
 
   stopLM() {
     this.play = false;
+    this.model.fullHearts = 0;
     clearTimeout(this.likePhotoTimerID);
     clearTimeout(this.timerDelayID);
     this.addListKeyboard();
@@ -342,7 +369,7 @@ export default class HaveyController {
   }
 
   onDblclickSpace(e) {
-    this.clickCurrentElement();
+    this.model.clickCurrentElement();
   }
 
   onSpace(e) {
@@ -425,7 +452,7 @@ export default class HaveyController {
       }, 300);
     } catch (e) {
       this.stopController();
-      console.log('start havey controller fail');
+      // console.log('start havey controller fail');
     }
   }
 

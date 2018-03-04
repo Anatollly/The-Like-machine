@@ -45,10 +45,10 @@ export const translator = {
   photoDelay: ['Delay: photo, sec', 'Задержка: фото, сек'],
   tagDelay: ['Delay: tag, min', 'Задержка: тэг, мин'],
   fiftyDelay: ['Delay: 50 photo, min', 'Задержка: 50 фото, мин'],
-  errorDelay: ['Delay: error, min', 'Задержка: ошибка, мин'],
+  errorDelay: ['Delay: warning, min', 'Задержка: ошибка, мин'],
   skipTheBest: ['Skip the best', 'Пропускать лучшее' ],
   numFullHearts: ['Number Like-photos', 'Число Like-постов подряд'],
-  likesNumber: ['Number of likes:', 'Количество лайков:'],
+  likesNumber: ['Maximum likes:', 'Количество лайков:'],
   range999: ['1 - 999', 'От 1 до 999'],
   rangePhoto: ['1 - 30', 'От 1 до 30'],
   rangeTag: ['1 - 30', 'От 1 до 30'],
@@ -168,7 +168,7 @@ export const settigsDataSelect = (() => {
       options: new Map([
         [2000, verySlow],
         [1400, slow],
-        [1000, average],
+        [1000, middle],
         [750, fast],
         [600, veryFast]
       ])

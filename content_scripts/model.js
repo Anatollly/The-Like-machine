@@ -21,6 +21,7 @@ import {
   setError400,
   setOnOffLm,
   setLikeNowCounter,
+  setFullHearts,
   setFavorites,
   setCurrentTag,
   setUnlimitedData,
@@ -95,6 +96,10 @@ export default class Model {
     this._state = setUnlimitedData(this._state, unlimited);
   }
 
+  set fullHearts(fullHearts) {
+    this._state = setFullHearts(this._state, fullHearts);
+  }
+
   set dateLikeToday(dateLikeToday) {
     this._state = setDateLikeTodayData(this._state, dateLikeToday);
     setDateLikeTodayDB(this.account, this._state.dateLikeToday);
@@ -120,7 +125,7 @@ export default class Model {
   }
 
   set currentElement(element) {
-    this.setCurrentEl(element);
+    this._state = setCurrentElement(this._state, element);
   }
 
   set remotePhoto(remotePhoto) {
@@ -189,7 +194,6 @@ export default class Model {
     }
     localStorage.getItem('LMOn') === 'true' ? this.switchOnLM() : this.switchOffLM();
     this._onLikeNow(0);
-    this.infoMessage = `Hello ${this.account}!`;
   }
 
   setInitPopupState() {
@@ -236,12 +240,8 @@ export default class Model {
     const prevElementNodes = elementsNodes[currentHaveyElementNum];
     LMOn && prevElementNodes && handlePrevElement(prevElementNodes.element);
     this._state = setCurrentHaveyElementNum(this._state, num);
-    this.setCurrentEl(elementsNodes[num].element);
+    this.currentElement = elementsNodes[num].element;
     LMOn && handleCurrentElement(elementsNodes[num].element, settings.currentPhotoColor);
-  }
-
-  setCurrentEl(element) {
-    this._state = setCurrentElement(this._state, element);
   }
 
   saveFavorites() {
@@ -257,8 +257,8 @@ export default class Model {
         this._state = setFavorites(this._state, type, { [name]: link});
         this.favorites = this._state.favorites;
         chrome.runtime.sendMessage({ favoritesState: this._state.favorites });
+        this.infoMessage = `\"${decodeURI(name)}\" added to ${type}`;
       }
-      this.infoMessage = `\"${decodeURI(name)}\" added to ${type}`;
     } catch (e) {
     }
   }
@@ -292,6 +292,43 @@ export default class Model {
     this.counter = { likeTotal: this._state.counter.likeTotal, likeToday: 0 };
   }
 
+  likeCurrentElement() {
+    const currentElement = this._state.currentElement;
+    const heartFull = elementData(currentElement).heartFull;
+    if (!heartFull) {
+      this.likeElement(currentElement);
+      this.fullHearts = 0;
+    } else {
+      this.fullHearts = this.state.fullHearts + 1;
+    }
+  }
+
+  likeElement(currentElement) {
+    try {
+      const image = elementData(currentElement).dblclickImageElement;
+      const heart = elementData(currentElement).heartElement;
+      image ? image.dispatchEvent(new MouseEvent('dblclick', {'bubbles': true})) : heart.click();
+    } catch (e) {
+    }
+  }
+
+  unlikeElement(currentElement) {
+    try {
+      elementData(currentElement).heartElement.click();
+    } catch (e) {
+    }
+  }
+
+  clickCurrentElement() {
+    try {
+      const currentElement = this._state.currentElement;
+      const heartFull = elementData(currentElement).heartFull;
+      heartFull ? this.unlikeElement(currentElement) : this.likeElement(currentElement);
+    } catch (e) {
+    }
+  }
+
+
   onClick(element) {
     if (this._state.LMOn) {
       elementData(element).heartFull ? this.unlikeHeart(element) : this.likeHeart(element);
@@ -301,7 +338,8 @@ export default class Model {
   onDblclick(element) {
     if (this._state.LMOn) {
       const postLink = elementData(element).postLink;
-      !this._state.elementsData.hasOwnProperty(postLink) && this.likeHeart(element);
+      // !this._state.elementsData.hasOwnProperty(postLink) && this.likeHeart(element);
+      this.likeHeart(element);
     }
   }
 
@@ -355,28 +393,26 @@ export default class Model {
     const { viewElementPosition } = this._state.settings;
     this._onStyleViewElement('rgba(255,0,0,0.75)', viewElementPosition);
     this.error = true;
-    this.model.infoMessage = `Warning! Delay ${this.state.settings.errorDelay} min`;
   }
 
   errorOff() {
     const { viewElementColor, viewElementPosition } = this._state.settings;
     this._onStyleViewElement(viewElementColor, viewElementPosition);
     this.error = false;
-    this.model.infoMessage = ``;
+    this.infoMessage = ``;
   }
 
   error400On() {
     const { viewElementPosition } = this._state.settings;
     this._onStyleViewElement('rgba(255,0,0,0.9)', viewElementPosition);
     this.error400 = true;
-    this.model.infoMessage = 'Warning! Delay 1 hours';
   }
 
   error400Off() {
     const { viewElementColor, viewElementPosition } = this._state.settings;
     this._onStyleViewElement(viewElementColor, viewElementPosition);
     this.error400 = false;
-    this.model.infoMessage = ``;
+    this.infoMessage = ``;
   }
 
   switchOnLM() {
@@ -426,7 +462,7 @@ export default class Model {
         storage.currentFavoriteLinkNum = currentFavoriteLinkNum + 1;
         const currentLink = favoriteLinks[currentFavoriteLinkNum + 1];
         storage.currentLink = currentLink;
-        this.model.infoMessage = `Waiting for next tag: ${this.state.settings.tagDelay} min`;
+        this.infoMessage = `Waiting for next tag: ${this.state.settings.tagDelay} min`;
         this.timerStartNextItemFavoritesID = setTimeout(() => {
           this.clickInstagramLink(currentLink);
         }, this._state.settings.tagDelay * 60 * 1000);
@@ -450,5 +486,12 @@ export default class Model {
     }
     this.infoMessage = 'Start: Favorites link';
     this.clickInstagramLink(links[0]);
+  }
+
+  openFullVersion() {
+    const a = document.createElement("a");
+    a.setAttribute("href", 'https://chrome.google.com/webstore/detail/like-machine/ncgclagijkcjkfbicolgamphegapbmba');
+    a.setAttribute("target", '_blank');
+    a.click();
   }
 }

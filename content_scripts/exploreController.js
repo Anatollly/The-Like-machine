@@ -48,13 +48,18 @@ export default class ExploreController {
           const { remotePhoto, settings: { skipTheBest }, currentTag: { name } } = this.model.state;
           clearInterval(this.timerStartID);
           this.model.remotePhoto = { start: true, pause: false, stop: false, name: this.name };
-          !skipTheBest && this.firstBestPhoto ? this.firstBestPhoto.click() : this.firstNewPhoto.click();
+          if (storage.playFavorites) {
+            this.timetID = setTimeout(() => {
+              !skipTheBest && this.firstBestPhoto ? this.firstBestPhoto.click() : this.firstNewPhoto.click();
+            }, 5000);
+          } else {
+            !skipTheBest && this.firstBestPhoto ? this.firstBestPhoto.click() : this.firstNewPhoto.click();
+          }
         }
         if (n > 100) clearInterval(timerStartID);
       }, 300);
     } catch (e) {
       clearInterval(this.timerStartID);
-      this.model.playFavorites = false;
       this.model.remotePhoto = { start: false, pause: false, stop: false, name: '' };
     }
   }
@@ -69,7 +74,7 @@ export default class ExploreController {
 
   startController() {
     const { currentTag: { name } } = this.model.state;
-    this.name = name;
+    this.name = decodeURI(name);
     this.model.remotePhoto = { start: false, pause: false, stop: false, name };
   }
 

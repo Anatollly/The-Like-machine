@@ -1,10 +1,10 @@
 {
     "manifest_version": 2,
 
-    "name": "Like machine",
+    "name": "Like machine free",
     "description": "The extension that will make you popular in the Instagram",
-    "default_locale": "ru",
-    "version": "1.0.5",
+    "default_locale": "en",
+    "version": "1.0.8",
     "short_name": "The extension for Instagram",
     "icons": {
             "16": "images/LM16.png",

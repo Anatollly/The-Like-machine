@@ -5,11 +5,11 @@ export const initialState = {
   },
   settings: {
     maxLikes: 10,
-    photoDelay: 2,
-    tagDelay: 3,
-    fiftyDelay: 2,
+    photoDelay: 5,
+    tagDelay: 10,
+    fiftyDelay: 8,
     errorDelay: 10,
-    numFullHearts: 3,
+    numFullHearts: 5,
     skipTheBest: false,
     viewElementSwitch: false,
     scrollSpeed: 1000,
@@ -19,7 +19,7 @@ export const initialState = {
     viewElementColor: 'rgba(0,128,128,0.3)',
     viewElementPosition: 'left:20px;bottom:80px;',
     pageZoom: 1,
-    language: 'russian'
+    language: 'english'
   },
   favorites: {
     locations: {},
@@ -28,17 +28,18 @@ export const initialState = {
     photos: {}
   },
   version: {
-    versionNum: '1.0.5',
-    versionType: 'pro',
-    unlimited: true,
-    todayMaxLikes: 5000,
-    maxFavorites: 100
+    versionNum: '1.0.9',
+    versionType: 'free',
+    unlimited: false,
+    todayMaxLikes: 100,
+    maxFavorites: 3
   },
   dateLikeToday: '',
   elementsData: {},
   elementsNodes: {},
   currentHaveyElementNum: 0,
   likeNowCounter: 0,
+  fullHearts: 0,
   currentElement: null,
   infoMessage: '',
   remotePhoto: {
@@ -201,6 +202,12 @@ export const setLikeNowCounter = (data, num) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof num !== 'number') throw new Error('Invalid data type. Arguments: "num"');
   return Object.assign({}, data, { likeNowCounter: num });
+};
+
+export const setFullHearts = (data, fullHearts) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof fullHearts !== 'number') throw new Error('Invalid data type. Arguments: "fullHearts"');
+  return Object.assign({}, data, { fullHearts });
 };
 
 export const setFavorites = (data, type, tag) => {

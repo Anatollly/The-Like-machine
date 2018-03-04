@@ -1,6 +1,8 @@
 import SelectElementView from './selectElementView';
 import InputElementView from './inputElementView';
-import favoritesElement from './favoritesLinkView'
+import favoritesElement from './favoritesLinkView';
+import manualContent from './manualContent';
+import additionallyContent from './additionallyContent';
 import { settigsDataSelect, settigsDataInput, initProfileData, translator, languageMap } from './data';
 
 // onClick icon
@@ -98,6 +100,7 @@ window.onload = () => {
   const settings = document.querySelector('.lm--tab-settings');
   const favorites = document.querySelector('.lm--tab-favorites');
   const manual = document.querySelector('.lm--tab-manual');
+  const additionally = document.querySelector('.lm--tab-additionally');
   const startBtn = btnGroupMain.querySelector('.lm--button-start');
   const pauseBtn = btnGroupMain.querySelector('.lm--button-pause');
   const stopBtn = btnGroupMain.querySelector('.lm--button-stop');
@@ -108,6 +111,8 @@ window.onload = () => {
   const startFavoritesBtn = document.querySelector('.lm--button-startFavorite');
   const favoritesTab = document.querySelector('.favorites-element');
   const infoMessageText = document.querySelector('.info-message');
+  const manualTab = document.querySelector('#manual');
+  const additionallyTab = document.querySelector('#additionally');
 
   // listening incoming messages
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -115,10 +120,14 @@ window.onload = () => {
     if (settingsState) {
       popupData['settingsData'] = settingsState;
       popupData['settingsElement'] = getSettingsElements(settingsState);
-      changeElementLang({ save, cancel, reset, settings, favorites, manual,
-        // additionally
-      }, settingsState.language);
+      changeElementLang({ save, cancel, reset, settings, favorites, manual, additionally }, settingsState.language);
+      manualTab.innerHTML = manualContent[settingsState.language];
+      additionallyTab.innerHTML = additionallyContent[settingsState.language];
       showSettingsElements(settingsTab, popupData.settingsElement, settingsState);
+      const fullVersion = document.querySelector('.full-version');
+      fullVersion && fullVersion.addEventListener('click', () => {
+        sendMessageToContent({click: 'fullVersion'});
+      })
     }
     if (favoritesState) showTags(favoritesState, favoritesTab);
     if (infoMessage) infoMessageText.innerHTML = infoMessage;

@@ -38,6 +38,7 @@ const setAccount = (path, controller) => {
 
 
 const handUrl = (url, controller) => {
+  console.log('url: ', url);
   if ((/^https:\/\/www\.instagram\.com.*$/).test(url)) {
     const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/);
     const postName = href[0];
@@ -93,6 +94,9 @@ const handClick = (click, controller, model) => {
     case 'saveTag':
       controller && model.saveFavorites();
       break;
+    case 'fullVersion':
+      model.openFullVersion();
+      break;
     default:
   }
 };
@@ -139,6 +143,7 @@ const loadAccountData = (data, globalData, account) => {
       error400,
       favoritesLinks
     } = message;
+
 
     if (url) handUrl(url, controller);
     if (click) handClick(click, controller.controller, controller.model);

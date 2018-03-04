@@ -19,11 +19,11 @@ chrome.webRequest.onCompleted.addListener(function(responseHeaders) {
         ["responseHeaders"]);
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.url) {
-    chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-      data.url = changeInfo.url;
-      chrome.tabs.sendMessage(tabs[0].id, data, () => {});
-    });
+  if ((/^https:\/\/www\.instagram\.com.*$/).test(changeInfo.url)) {
+    data.url = changeInfo.url;
+    chrome.tabs.query({index: tabId, pinned: true}, tabs => {
+      chrome.tabs.sendMessage(tabId, data, () => {});
+    })
   }
 });
 
@@ -35,10 +35,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     data.onload = true;
     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
       data.url = tabs[0].url;
-      !(/^http.?:\/\/www\.instagram\.com\/.*$/).test(data.url) && chrome.tabs.setZoom(1);
-      chrome.tabs.sendMessage(tabs[0].id, data, () => {});
+      if ((/^https:\/\/www\.instagram\.com.*$/).test(tabs[0].url)) {
+        if (pageZoom) chrome.tabs.setZoom(pageZoom);
+        chrome.tabs.sendMessage(tabs[0].id, data, () => {});
+      } else {
+        chrome.tabs.query({active: true, currentWindow: false}, tabs => {
+          if (pageZoom) chrome.tabs.setZoom(pageZoom);
+          data.url = tabs[0].url;
+          chrome.tabs.sendMessage(tabs[0].id, data, () => {});
+        });
+      }
     });
   }
-  if (pageZoom) chrome.tabs.setZoom(pageZoom);
   if (unlimited) chrome.browserAction.setBadgeText({text: unlimited });
 });
