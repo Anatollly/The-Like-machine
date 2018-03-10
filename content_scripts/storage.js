@@ -2,7 +2,8 @@ const initStorage = {
   playFavorites: false,
   favoriteLinks: [],
   currentFavoriteLinkNum: 0,
-  currentLink: ''
+  currentLink: '',
+  reload: false
 }
 
 class BrowserStorage {
@@ -62,6 +63,14 @@ class BrowserStorage {
 
   get currentLink() {
     return localStorage.getItem('lm-currentLink');
+  }
+
+  set reload(reload) {
+    localStorage.setItem('lm-reload', reload);
+  }
+
+  get reload() {
+    return localStorage.getItem('lm-reload') === 'true';
   }
 
   resetStorage() {

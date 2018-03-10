@@ -41,6 +41,7 @@ export default class ExploreController {
 
   startLM() {
     try {
+      this.model.infoMessage = 'Start';
       let n = 0;
       this.timerStartID = setInterval(() => {
         n += 1;
@@ -65,10 +66,12 @@ export default class ExploreController {
   }
 
   pauseLM() {
+    this.model.infoMessage = 'Pause';
     this.model.remotePhoto = { start: false, pause: true, stop: false, name: this.name };
   }
 
   stopLM() {
+    this.model.infoMessage = 'Stop';
     this.model.remotePhoto = { start: false, pause: false, stop: true, name: this.name };
   }
 

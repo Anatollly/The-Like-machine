@@ -35,6 +35,13 @@ export function setUnlimitedDB(account, bool) {
   }
 }
 
+export function setLMOnDB(account, bool) {
+  try {
+    const usersRef = firebase.database().ref('accounts/' + account + '/LMOn/').set(bool);
+  } catch (e) {
+  }
+}
+
 export function setDateLikeTodayDB(account, date) {
   try {
     const usersRef = firebase.database().ref('accounts/' + account + '/dateLikeToday/').set(date);

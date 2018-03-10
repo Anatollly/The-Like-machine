@@ -5,8 +5,8 @@ let data = {
 };
 
 chrome.webRequest.onCompleted.addListener(function(responseHeaders) {
-  const statusCode = responseHeaders.statusCode;
-  if(statusCode >= 400 && statusCode < 500) {
+  const { statusCode, method } = responseHeaders;
+  if(statusCode >= 400 && statusCode < 500 && method === 'POST') {
     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
       if (statusCode === 400) {
         chrome.tabs.sendMessage(tabs[0].id, { error400: true }, () => {});
@@ -36,16 +36,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
       data.url = tabs[0].url;
       if ((/^https:\/\/www\.instagram\.com.*$/).test(tabs[0].url)) {
-        if (pageZoom) chrome.tabs.setZoom(pageZoom);
         chrome.tabs.sendMessage(tabs[0].id, data, () => {});
       } else {
         chrome.tabs.query({active: true, currentWindow: false}, tabs => {
-          if (pageZoom) chrome.tabs.setZoom(pageZoom);
           data.url = tabs[0].url;
           chrome.tabs.sendMessage(tabs[0].id, data, () => {});
         });
       }
     });
   }
+  chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+    if ((/^https:\/\/www\.instagram\.com.*$/).test(tabs[0].url)) {
+      if (pageZoom) chrome.tabs.setZoom(pageZoom);
+    }
+  });
   if (unlimited) chrome.browserAction.setBadgeText({text: unlimited });
 });

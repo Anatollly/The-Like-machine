@@ -64,16 +64,21 @@ export default class LmControllerView {
         border: 1px solid rgba(0,0,0,0.5);
         border-radius: 10px;
       }
+      .lm--count-name {
+        height: 24px;
+        margin: 0;
+      }
       .lm--count-item {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         margin: 10px 0;
+        height: 24px;
       }
       .lm--count-heart {
-        background-position: -100px -351px;
-        background-image: url(/static/bundles/sprite_core_2x.png/9e7638226e17.png);
-        background-size: 429px 398px;
+        background-position: -275px -352px;
+        background-image: url(/static/bundles/sprite_core_2x.png/deae432c6aed.png);
+        background-size: 435px 401px;
         height: 24px;
         width: 24px;
         margin: 0 0 0 5px;

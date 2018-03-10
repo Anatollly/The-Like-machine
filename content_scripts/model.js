@@ -42,7 +42,8 @@ import {
   setDateLikeTodayDB,
   setInitSuperDB,
   setVersionDB,
-  setInitDataDB
+  setInitDataDB,
+  setLMOnDB
 } from './firebase';
 
 import {
@@ -142,6 +143,7 @@ export default class Model {
 
   set LMOn(LMOn) {
     this._state = setOnOffLm(this._state, LMOn);
+    setLMOnDB(this.account, this._state.LMOn);
   }
 
   set currentTag(currentTag) {
@@ -167,7 +169,8 @@ export default class Model {
 
   setInitState() {
     if (this.data) {
-      const { settings, counter , favorites, forceUnlimited, dateLikeToday } = this.data;
+      const { settings, counter , favorites, forceUnlimited, dateLikeToday, LMOn } = this.data;
+      this.LMOn = !!LMOn;
       const today = moment().format("DD-MM-YY");
       if (settings) this._state = setInitSettingsData(this._state, settings);
       if (counter) this._state = setInitCounterData(this._state, counter);
@@ -192,7 +195,7 @@ export default class Model {
       };
       setInitDataDB(this.account, initDataDB);
     }
-    localStorage.getItem('LMOn') === 'true' ? this.switchOnLM() : this.switchOffLM();
+    this._state.LMOn ? this.switchOnLM() : this.switchOffLM();
     this._onLikeNow(0);
   }
 
@@ -435,7 +438,6 @@ export default class Model {
     this._onStyleViewElement(viewElementColor, viewElementPosition);
     chrome.runtime.sendMessage({ pageZoom });
     chrome.runtime.sendMessage({ LMOn: true });
-    localStorage.setItem('LMOn', true);
   }
 
   switchOffLM() {
@@ -445,8 +447,8 @@ export default class Model {
     chrome.runtime.sendMessage({ pageZoom: 1 });
     const prevElementNodes = elementsNodes[currentHaveyElementNum];
     prevElementNodes && handlePrevElement(prevElementNodes.element);
+    chrome.runtime.sendMessage({ pageZoom: 1 });
     chrome.runtime.sendMessage({ LMOn: false });
-    localStorage.setItem('LMOn', false);
   }
 
   clickInstagramLink(link) {

@@ -23,6 +23,10 @@ export default class PhotoController {
     return this._wrapElement && this._wrapElement.querySelector('article');
   }
 
+  get errorElement() {
+    return document.querySelector('.error-container');
+  }
+
   get element() {
     return elementData(this.articleElement).element;
   }
@@ -54,11 +58,18 @@ export default class PhotoController {
             if (start) this.startLM();
             if (pause) this.pauseLM();
             if (stop) this.stopLM();
+          } else if (this.errorElement) {
+            clearInterval(this.openPostTimerID);
+            if (storage.favoriteLinks.length > 0) {
+              storage.playFavorites = true;
+              this.model.startNextItemFavorites();
+            } else {
+              storage.resetStorage();
+            }
           }
         }, 300);
       } catch (e) {
         this.stopController();
-        if (storage.playFavorites) this.model.startNextItemFavorites();
       }
     }
   }
@@ -155,7 +166,11 @@ export default class PhotoController {
           case 'fullHearts':
             this.stopLM();
             this.model.infoMessage = `${numFullHearts} full hearts in a row`;
-            if (storage.playFavorites) this.model.startNextItemFavorites();
+            if (storage.playFavorites) {
+              this.model.startNextItemFavorites();
+            } else {
+              storage.resetStorage();
+            }
             break;
           case '50likes':
             this.pauseLM();
@@ -168,7 +183,11 @@ export default class PhotoController {
           case 'maxLikes':
             this.stopLM();
             this.model.infoMessage = `You have reached ${maxLikes} likes`;
-            if (storage.playFavorites) this.model.startNextItemFavorites();
+            if (storage.playFavorites) {
+              this.model.startNextItemFavorites();
+            } else {
+              storage.resetStorage();
+            }
             break;
           case 'error400':
             this.pauseLM();
@@ -181,7 +200,7 @@ export default class PhotoController {
             break;
           case 'error':
             this.pauseLM();
-            this.model.infoMessage = `Warning! Delay ${this.state.settings.errorDelay} min`;
+            this.model.infoMessage = `Warning! Delay ${errorDelay} min`;
             this.timerDelayID = setTimeout(() => {
               this.errorOff();
               this.goToNextElement(this.onStartLM.bind(this));

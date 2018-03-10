@@ -38,7 +38,6 @@ const setAccount = (path, controller) => {
 
 
 const handUrl = (url, controller) => {
-  console.log('url: ', url);
   if ((/^https:\/\/www\.instagram\.com.*$/).test(url)) {
     const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/);
     const postName = href[0];
@@ -83,7 +82,12 @@ const handClick = (click, controller, model) => {
       storage.resetStorage();
       break;
     case 'on':
-      model.state.LMOn ? model.switchOffLM() : model.switchOnLM();
+      if (model.state.LMOn) {
+        model.switchOffLM();
+      } else {
+        model.switchOnLM();
+        location.reload();
+      }
       break;
     case 'top':
       controller && window.scrollTo(0, 0);
@@ -111,8 +115,12 @@ const handViewElementSwitch = (toogle, model) => {
 
 const getProfile = () => {
   try {
-    const profile = document.querySelector('.coreSpriteDesktopNavProfile').href;
-    return profile.match(/^https:\/\/www.instagram.com\/([^\/]*)\/$/)[1];
+    const navProfile = document.querySelector('.coreSpriteDesktopNavProfile');
+    const navProfileHref = navProfile && navProfile.href;
+    const linkProfile = document.querySelector('#link_profile a');
+    const linkProfileHref = linkProfile && linkProfile.href;
+    const profile = navProfileHref || linkProfileHref;
+    return profile.match(/^https:\/\/www.instagram.com\/([^\/]*)\/$/)[1].replace(/[.,#$\/\[\]]/g, '&dot');
   } catch (e) {
   }
 }
@@ -176,6 +184,6 @@ window.onload = () => {
     if (n > 10) clearInterval(timerOnloadID);
   },300);
   window.onbeforeunload = () => {
-    if (!storage.currentLink) storage.resetStorage();
+    if (!storage.currentLink) storage.playFavorites = false;
   };
 };

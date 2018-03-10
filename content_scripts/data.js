@@ -28,11 +28,11 @@ export const initialState = {
     photos: {}
   },
   version: {
-    versionNum: '1.0.9',
-    versionType: 'free',
-    unlimited: false,
-    todayMaxLikes: 100,
-    maxFavorites: 3
+    versionNum: '1.0.12',
+    versionType: 'pro',
+    unlimited: true,
+    todayMaxLikes: 5000,
+    maxFavorites: 100
   },
   dateLikeToday: '',
   elementsData: {},

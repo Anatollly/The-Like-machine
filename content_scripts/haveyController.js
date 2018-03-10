@@ -279,7 +279,7 @@ export default class HaveyController {
             break;
           case 'error':
             this.pauseLM();
-            this.model.infoMessage = `Warning! Delay ${this.state.settings.errorDelay} min`;
+            this.model.infoMessage = `Warning! Delay ${errorDelay} min`;
             this.timerDelayID = setTimeout(() => {
               this.errorOff();
               this.goToNextElement(this.onStartLM.bind(this));
