@@ -42,6 +42,13 @@ export function setLMOnDB(account, bool) {
   }
 }
 
+export function setInfoMessageDB(account, infoMessage) {
+  try {
+    const usersRef = firebase.database().ref('accounts/' + account + '/infoMessage/').set(infoMessage);
+  } catch (e) {
+  }
+}
+
 export function setDateLikeTodayDB(account, date) {
   try {
     const usersRef = firebase.database().ref('accounts/' + account + '/dateLikeToday/').set(date);

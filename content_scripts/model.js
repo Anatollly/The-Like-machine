@@ -43,7 +43,8 @@ import {
   setInitSuperDB,
   setVersionDB,
   setInitDataDB,
-  setLMOnDB
+  setLMOnDB,
+  setInfoMessageDB
 } from './firebase';
 
 import {
@@ -153,6 +154,7 @@ export default class Model {
   set infoMessage(infoMessage) {
     this._state = setInfoMessage(this._state, infoMessage);
     chrome.runtime.sendMessage({ infoMessage });
+    setInfoMessageDB(this.account, this._state.infoMessage);
   }
 
   setLimit() {
@@ -256,6 +258,15 @@ export default class Model {
           const date = moment(elementData(this._state.currentElement).dateCreate).format("DD-MM-YYYY_HH:mm");
           name = `${userName}_${date}`;
           if (!link) link = elementData(this._state.currentElement).postLink;
+        }
+        if (type === 'locations') {
+          const locationElement = document.querySelector('._qkuz0');
+          const spriteLocation = locationElement.querySelector('div');
+          if (spriteLocation) {
+            name = locationElement.innerHTML.match(/^<div.*<\/div>(.*)$/)[1];
+          } else {
+            name = locationElement.innerHTML;
+          }
         }
         this._state = setFavorites(this._state, type, { [name]: link});
         this.favorites = this._state.favorites;

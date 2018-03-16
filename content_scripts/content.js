@@ -8,10 +8,9 @@ const setLocationsAndTags = (path, controller) => {
   const currentTag = {};
   const typeTag = path.match(/^\/[^\/]*\/([^\/]*)\/.*$/);
   if (typeTag && typeTag[1] === 'locations') {
-    const location = path.match(/^\/explore\/locations\/.*\/([^\/]*)\/$/);
     currentTag.type = 'locations';
-    if (location[1]) currentTag.name = location[1];
-    if (location[0]) currentTag.link = location[0];
+    currentTag.name = '';
+    currentTag.link = path;
   }
   if (typeTag && typeTag[1] === 'tags') {
     currentTag.type = 'tags';

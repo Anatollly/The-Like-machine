@@ -28,7 +28,7 @@ export const initialState = {
     photos: {}
   },
   version: {
-    versionNum: '1.0.12',
+    versionNum: '1.0.13',
     versionType: 'pro',
     unlimited: true,
     todayMaxLikes: 5000,
