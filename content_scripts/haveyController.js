@@ -1,7 +1,12 @@
 import elementData from './elementData';
 
 import scrollToEl from 'scroll-to-element';
-//import ScrollEvents from 'scroll-events';
+import {
+  checkTodayLikes,
+  checkFullHearts,
+  checkLikes,
+  checkError
+} from './util';
 
 export default class HaveyController {
   constructor(model) {
@@ -17,7 +22,7 @@ export default class HaveyController {
   }
 
   get haveyElement() {
-    return document.querySelector('._havey');
+    return document.querySelector('._d4oao');
   }
 
   get currentNodes() {
@@ -196,28 +201,6 @@ export default class HaveyController {
     }, 50)
   }
 
-  likeElement(elementNodes) {
-    const image = elementData(elementNodes.element).dblclickImageElement;
-    const heart = elementNodes.heartElement;
-    image ? image.dispatchEvent(new MouseEvent('dblclick', {'bubbles': true})) : heart.click();
-  }
-
-  unlikeElement(elementNodes) {
-    elementNodes.heartElement.click();
-  }
-
-  clickCurrentElement() {
-    const { currentNodes } = this;
-    const heartFull = elementData(currentNodes.element).heartFull;
-    heartFull ? this.unlikeElement(currentNodes) : this.likeElement(currentNodes);
-  }
-
-  likeCurrentElement() {
-    const { currentNodes } = this;
-    const heartFull = elementData(currentNodes.element).heartFull;
-    !heartFull && this.likeElement(currentNodes);
-  }
-
   goToNextElement(callback) {
     const { nextNodes } = this;
     if (nextNodes) {
@@ -228,35 +211,115 @@ export default class HaveyController {
   }
 
   onStartLM() {
-    const likeDelay = this.model.state.settings.likeDelay;
-    if (this.play) {
-      this.likeCurrentElement();
-      this.likePhotoTimerID = setTimeout(() => {
-        const { settings: { maxLikes }, likeNowCounter } = this.model.state;
-        likeNowCounter < maxLikes ? this.goToNextElement(this.onStartLM.bind(this)) : this.stopLM();
-      }, likeDelay);
-    }
+    const {
+      settings: { maxLikes, fiftyDelay, errorDelay, numFullHearts, photoDelay },
+      counter: { likeToday },
+      fullHearts,
+      likeNowCounter,
+      error,
+      error400,
+      version: { todayMaxLikes }
+    } = this.model.state;
+    checkTodayLikes(likeToday, todayMaxLikes)
+      .then(() => {
+        return new Promise((resolve, reject) => {
+          this.likePhotoTimerID = setTimeout(() => {
+           this.model.likeCurrentElement();
+           resolve();
+         }, photoDelay * 1000);
+        })
+      })
+      .then(() => {
+        return checkFullHearts(fullHearts, numFullHearts);
+      })
+      .then(() => {
+        return checkLikes(likeNowCounter, maxLikes);
+      })
+      .then(() => {
+        return checkError(error400, error);
+      })
+      .then(() => {
+        return new Promise((resolve, reject) => {
+          this.likePhotoTimerID = setTimeout(() => {
+            this.goToNextElement(this.onStartLM.bind(this));
+            resolve();
+          }, 800);
+        })
+      })
+      .catch((message) => {
+        switch (message) {
+          case 'limitLikes':
+            this.stopLM();
+            this.model.infoMessage = `You have reached the limit of likes for today (maximum ${todayMaxLikes} likes)`;
+            break;
+          case 'fullHearts':
+            this.stopLM();
+            this.model.infoMessage = `${numFullHearts} full hearts in a row`;
+            break;
+          case '50likes':
+            this.pauseLM();
+            this.model.infoMessage = `50 likes: Delay ${fiftyDelay} min`;
+            this.timerDelayID = setTimeout(() => {
+              this.goToNextElement(this.onStartLM.bind(this));
+              this.model.infoMessage = `Start ${this.exploreName ? this.exploreName : ''}`;
+            }, 10000); //fiftyDelay * 60 * 1000);
+            break;
+          case 'maxLikes':
+            this.stopLM();
+            this.model.infoMessage = `You have reached ${maxLikes} likes`;
+            break;
+          case 'error400':
+            this.pauseLM();
+            this.model.infoMessage = 'Warning! Delay 1 hours';
+            this.timerDelayID = setTimeout(() => {
+              this.model.error400Off();
+              this.goToNextElement(this.onStartLM.bind(this));
+              this.model.infoMessage = `Start ${this.exploreName ? this.exploreName : ''}`;
+            }, 60 * 60 * 1000);
+            break;
+          case 'error':
+            this.pauseLM();
+            this.model.infoMessage = `Warning! Delay ${errorDelay} min`;
+            this.timerDelayID = setTimeout(() => {
+              this.errorOff();
+              this.goToNextElement(this.onStartLM.bind(this));
+              this.model.infoMessage = `Start ${this.exploreName ? this.exploreName : ''}`;
+            }, errorDelay * 60 * 1000);
+            break;
+          default:
+            this.stopLM();
+            this.model.infoMessage = `error`;
+        }
+      })
   }
+
 
   startLM() {
     if (!this.play) {
       this.play = true;
+      this.model.fullHearts = 0;
       this.ignoreKeyboard();
       this.onStartLM();
+      this.model.infoMessage = 'Start';
     }
   }
 
   pauseLM() {
     this.play = false;
     clearTimeout(this.likePhotoTimerID);
+    clearTimeout(this.timerDelayID);
     this.addListKeyboard();
+    this.model.infoMessage = 'Pause';
   }
 
   stopLM() {
     this.play = false;
+    this.model.fullHearts = 0;
     clearTimeout(this.likePhotoTimerID);
+    clearTimeout(this.timerDelayID);
     this.addListKeyboard();
     this.model.resetLikeNowCounter();
+    this.model.infoMessage = 'Stop';
   }
 
   onClickSpace(e) {
@@ -306,22 +369,24 @@ export default class HaveyController {
   }
 
   onDblclickSpace(e) {
-    this.clickCurrentElement();
+    this.model.clickCurrentElement();
   }
 
   onSpace(e) {
-    const { dblclickInterval } = this.model.state.settings;
-    e.preventDefault();
-    if (this.spaceInterval) {
-      clearTimeout(this.timerSpaceID);
-      this.spaceInterval = false;
-      this.onDblclickSpace(e);
-    } else {
-      this.spaceInterval = true;
-      this.timerSpaceID = setTimeout(() => {
+    if (e.target.nodeName !== 'INPUT') {
+      const { dblclickInterval } = this.model.state.settings;
+      e.preventDefault();
+      if (this.spaceInterval) {
+        clearTimeout(this.timerSpaceID);
         this.spaceInterval = false;
-        this.onClickSpace(e);
-      }, dblclickInterval);
+        this.onDblclickSpace(e);
+      } else {
+        this.spaceInterval = true;
+        this.timerSpaceID = setTimeout(() => {
+          this.spaceInterval = false;
+          this.onClickSpace(e);
+        }, dblclickInterval);
+      }
     }
   }
 
@@ -369,7 +434,7 @@ export default class HaveyController {
   startController() {
     try {
       this.haveyTimerID = setInterval(() => {
-        if (this.haveyElement && this.haveyElement.querySelectorAll('article').length > 3) {
+        if (this.haveyElement && this.haveyElement.querySelectorAll('article').length > 2) {
           clearInterval(this.haveyTimerID);
           this.numberingElements(() => {
             this.addListInsertElement();
@@ -387,7 +452,7 @@ export default class HaveyController {
       }, 300);
     } catch (e) {
       this.stopController();
-      console.log('start havey controller fail');
+      // console.log('start havey controller fail');
     }
   }
 
@@ -406,6 +471,7 @@ export default class HaveyController {
     clearInterval(this.scrollID);
     clearTimeout(this.timerSpaceID);
     clearInterval(this.haveyTimerID);
+    clearTimeout(this.timerDelayID);
   }
 
   restartController() {

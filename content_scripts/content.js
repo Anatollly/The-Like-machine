@@ -1,16 +1,16 @@
 import parse from 'url-parse';
 import LmControllerView from './lmControllerView';
 import SwitchController from './switchController';
-import { checkAccounts, runSuper } from './firebase';
+import { checkAccounts } from './firebase';
+import storage from './storage';
 
 const setLocationsAndTags = (path, controller) => {
   const currentTag = {};
   const typeTag = path.match(/^\/[^\/]*\/([^\/]*)\/.*$/);
   if (typeTag && typeTag[1] === 'locations') {
-    const location = path.match(/^\/explore\/locations\/.*\/([^\/]*)\/$/);
     currentTag.type = 'locations';
-    if (location[1]) currentTag.name = location[1];
-    if (location[0]) currentTag.link = location[0];
+    currentTag.name = '';
+    currentTag.link = path;
   }
   if (typeTag && typeTag[1] === 'tags') {
     currentTag.type = 'tags';
@@ -37,31 +37,38 @@ const setAccount = (path, controller) => {
 
 
 const handUrl = (url, controller) => {
-  const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/);
-  const postName = href[0];
-  const path = href[1];
-
-  switch (path) {
-    case '':
-      controller.onSwitchHavey();
-      controller.model.currentTag = { type: 'photos', name: '', link: '' };
-      break;
-    case 'p':
-      controller.onSwitchPhoto(postName);
-      controller.model.currentTag = { type: 'photos', name: '', link: postName };
-      break;
-    case 'explore':
-      controller.onSwitchExplore();
-      setLocationsAndTags(postName, controller);
-      break;
-    default:
-      controller.onSwitchOff();
-      setAccount(postName, controller);
+  if ((/^https:\/\/www\.instagram\.com.*$/).test(url)) {
+    const href = parse(url, true).pathname.match(/^\/([^\/]*).*$/);
+    const postName = href[0];
+    const path = href[1];
+    const { currentLink, playFavorites } = storage.state;
+    switch (path) {
+      case '':
+        controller.onSwitchHavey();
+        controller.model.currentTag = { type: 'photos', name: '', link: '' };
+        break;
+      case 'p':
+        controller.onSwitchPhoto(postName);
+        controller.model.currentTag = { type: 'photos', name: '', link: postName };
+        break;
+      case 'explore':
+        setLocationsAndTags(postName, controller);
+        controller.onSwitchExplore();
+        if (postName === currentLink && playFavorites) {
+          storage.currentLink = '';
+          controller.controller.startLM();
+        }
+        break;
+      default:
+        controller.onSwitchOff();
+        setAccount(postName, controller);
+    }
   }
 };
 
 const handClick = (click, controller, model) => {
-  controller && controller.model.error403Off();
+  controller && controller.model.errorOff();
+  controller && controller.model.error400Off();
   switch (click) {
     case 'start':
       controller && controller.startLM();
@@ -71,9 +78,15 @@ const handClick = (click, controller, model) => {
       break;
     case 'stop':
       controller && controller.stopLM();
+      storage.resetStorage();
       break;
     case 'on':
-      model.state.LMOn ? model.switchOffLM() : model.switchOnLM();
+      if (model.state.LMOn) {
+        model.switchOffLM();
+      } else {
+        model.switchOnLM();
+        location.reload();
+      }
       break;
     case 'top':
       controller && window.scrollTo(0, 0);
@@ -84,8 +97,8 @@ const handClick = (click, controller, model) => {
     case 'saveTag':
       controller && model.saveFavorites();
       break;
-    case 'zeroCounter':
-      controller &&  model.resetTodayCounter();
+    case 'fullVersion':
+      model.openFullVersion();
       break;
     default:
   }
@@ -99,28 +112,21 @@ const handViewElementSwitch = (toogle, model) => {
   model.viewElementSwitch = toogle;
 };
 
-const clickLink = (link) => {
-  const a = document.createElement("a");
-  a.setAttribute("href", link);
-  a.click();
-};
-
 const getProfile = () => {
   try {
-    const profile = document.querySelector('.coreSpriteDesktopNavProfile').href;
-    return profile.match(/^https:\/\/www.instagram.com\/([^\/]*)\/$/)[1];
+    const navProfile = document.querySelector('.coreSpriteDesktopNavProfile');
+    // const navProfile = document.querySelector('.kQqyt');
+    const navProfileHref = navProfile && navProfile.href;
+    const linkProfile = document.querySelector('#link_profile a');
+    const linkProfileHref = linkProfile && linkProfile.href;
+    const profile = navProfileHref || linkProfileHref;
+    return profile.match(/^https:\/\/www.instagram.com\/([^\/]*)\/$/)[1].replace(/[.,#$\/\[\]]/g, '&dot');
   } catch (e) {
-    // console.log('no profile');
   }
 }
 
-const handError403 = (controller) => {
-  controller.stopLM();
-  controller.model.error403On();
-}
-
-const loadAccountData = (data, account) => {
-  const controller = new SwitchController(data, account);
+const loadAccountData = (data, globalData, account) => {
+  const controller = new SwitchController(data, globalData, account);
   const lmControllerView = new LmControllerView(controller);
 
   lmControllerView.addElement();
@@ -135,23 +141,32 @@ const loadAccountData = (data, account) => {
       machineSwitch,
       popupInitState,
       popupChangeSettings,
+      saveSettings,
+      cancelSettings,
       popupResetSettings,
       viewElementSwitch,
       link,
       deleteTag,
-      error
+      error,
+      error400,
+      favoritesLinks
     } = message;
+
 
     if (url) handUrl(url, controller);
     if (click) handClick(click, controller.controller, controller.model);
     if (maxLikes) handMaxLikes(maxLikes, controller.model);
     if (popupInitState) controller.model.setInitPopupState();
     if (popupChangeSettings) controller.model.setPopupSettings(popupChangeSettings);
+    if (saveSettings) controller.model.infoMessage = 'Save settings';
+    if (cancelSettings) controller.model.infoMessage = 'Cancel settings';
     if (popupResetSettings) controller.model.resetPopupSettings();
     if (viewElementSwitch) handViewElementSwitch(viewElementSwitch, controller.model);
-    if (link) clickLink(link);
+    if (link) controller.model.clickInstagramLink(link);
     if (deleteTag) controller.model.delFavoriteTag(deleteTag.type, deleteTag.name);
-    if (error) handError403(controller.controller);
+    if (error) controller.model.errorOn();
+    if (error400) controller.model.error400On();
+    if (favoritesLinks) controller.model.startFavorites(favoritesLinks);
   });
   chrome.runtime.sendMessage({ status: 'onload' });
 }
@@ -165,8 +180,10 @@ window.onload = () => {
       clearInterval(timerOnloadID);
       window.scrollTo(0, 0);
       checkAccounts(account, loadAccountData);
-      runSuper(account);
     }
-    if (n > 10) clearInterval(timerOnloadID);
+    if (n > 20) clearInterval(timerOnloadID);
   },300);
+  window.onbeforeunload = () => {
+    if (!storage.currentLink) storage.playFavorites = false;
+  };
 };

@@ -58,17 +58,49 @@ body {
   height: 80%;
 }
 
+.lm--favorites-checkbox {
+  margin: 5px 5px 5px 10px;
+  width: 14px;
+}
+
 .lm--favorites-link {
-  margin: 5px 10px;
+  margin: 5px 10px 5px 5px;
   width: 65%;
 }
 
 .lm--favorites-delete {
-  width: 25%;
+  width: 20%;
 }
 
 .favorites-element {
   overflow-y: scroll;
   width: 100%;
   height: 80%;
+}
+
+.lm--button-startFavorite {
+  position: absolute;
+  width: 70px;
+  height: 31px;
+  top: 154px;
+  left: 4px;
+}
+
+#manual {
+  overflow-y: scroll;
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+}
+
+#additionally {
+  overflow-y: scroll;
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+}
+
+.info-message {
+  height: 50px;
+  margin: 5px 30px 10px 30px;
 }

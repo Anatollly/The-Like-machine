@@ -4,10 +4,11 @@ import ExploreController from './exploreController';
 import Model from './model';
 
 export default class SwitchController {
-  constructor(data, account) {
+  constructor(data, globalData, account) {
     this.data = data;
     this.account = account;
-    this.model = new Model(this.data, this.account);
+    this.globalData = globalData;
+    this.model = new Model(this.data, this.globalData, this.account);
     this.haveyController = new HaveyController(this.model);
     this.photoController = new PhotoController(this.model);
     this.exploreController = new ExploreController(this.model);
@@ -27,7 +28,8 @@ export default class SwitchController {
   }
 
   onSwitchExplore() {
-    if(this._controller !== this.exploreController) this.switchToExploreController();
+    // if(this._controller !== this.exploreController) this.switchToExploreController();
+    this.switchToExploreController();
   }
 
   onSwitchOff() {
@@ -38,16 +40,19 @@ export default class SwitchController {
     this._controller = this.haveyController;
     this.haveyController.startController();
     this.photoController.stopController();
+    this.exploreController.stopController();
   }
 
   switchToPhotoController() {
     this._controller = this.photoController;
     this.photoController.startController();
     this.haveyController.stopController();
+    this.exploreController.stopController();
   }
 
   switchToExploreController() {
     this._controller = this.exploreController;
+    this.exploreController.startController();
     this.haveyController.stopController();
     this.photoController.stopController();
   }

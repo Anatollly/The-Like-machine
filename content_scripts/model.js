@@ -1,5 +1,7 @@
 import elementData from './elementData';
 import moment from 'moment';
+import storage from './storage';
+import parse from 'url-parse';
 
 import {
   initialState,
@@ -14,21 +16,35 @@ import {
   delElementNodes,
   setCurrentHaveyElementNum,
   setCurrentElement,
-  setPlayPhoto,
-  setError403,
+  setRemotePhoto,
+  setError,
+  setError400,
   setOnOffLm,
   setLikeNowCounter,
+  setFullHearts,
   setFavorites,
   setCurrentTag,
+  setUnlimitedData,
   setInitFavoritesData,
   setInitSettingsData,
-  setInitCounterData
+  setInitCounterData,
+  setDateLikeTodayData,
+  setTodayMaxLikesData,
+  setMaxFavoritesData,
+  setInfoMessage
 } from './data';
 
 import {
   setCounterDB,
   setFavoritesDB,
   setSettingsDB,
+  setUnlimitedDB,
+  setDateLikeTodayDB,
+  setInitSuperDB,
+  setVersionDB,
+  setInitDataDB,
+  setLMOnDB,
+  setInfoMessageDB
 } from './firebase';
 
 import {
@@ -37,8 +53,9 @@ import {
 } from './haveyCurrentElementView.js';
 
 export default class Model {
-  constructor(data, account, state = initialState) {
+  constructor(data, globalData, account, state = initialState) {
     this.data = data;
+    this.globalData = globalData;
     this.account = account;
     this._state = state;
   }
@@ -77,6 +94,27 @@ export default class Model {
     setFavoritesDB(this.account, this._state.favorites);
   }
 
+  set unlimited(unlimited) {
+    this._state = setUnlimitedData(this._state, unlimited);
+  }
+
+  set fullHearts(fullHearts) {
+    this._state = setFullHearts(this._state, fullHearts);
+  }
+
+  set dateLikeToday(dateLikeToday) {
+    this._state = setDateLikeTodayData(this._state, dateLikeToday);
+    setDateLikeTodayDB(this.account, this._state.dateLikeToday);
+  }
+
+  set todayMaxLikes(todayMaxLikes) {
+    this._state = setTodayMaxLikesData(this._state, todayMaxLikes);
+  }
+
+  set maxFavorites(maxFavorites) {
+    this._state = setMaxFavoritesData(this._state, maxFavorites);
+  }
+
   set counter(data) {
     this._state = setCounterData(this._state, data);
     this._onLikeTotal(data.likeTotal);
@@ -89,43 +127,87 @@ export default class Model {
   }
 
   set currentElement(element) {
-    this.setCurrentEl(element);
+    this._state = setCurrentElement(this._state, element);
   }
 
-  set playPhoto(playPhoto) {
-    this._state = setPlayPhoto(this._state, playPhoto);
+  set remotePhoto(remotePhoto) {
+    this._state = setRemotePhoto(this._state, remotePhoto);
   }
 
-  set error403(error403) {
-    this._state = setError403(this._state, error403);
+  set error(error) {
+    this._state = setError(this._state, error);
+  }
+
+  set error400(error400) {
+    this._state = setError400(this._state, error400);
   }
 
   set LMOn(LMOn) {
     this._state = setOnOffLm(this._state, LMOn);
+    setLMOnDB(this.account, this._state.LMOn);
   }
 
   set currentTag(currentTag) {
     this._state = setCurrentTag(this._state, currentTag);
   }
 
+  set infoMessage(infoMessage) {
+    this._state = setInfoMessage(this._state, infoMessage);
+    chrome.runtime.sendMessage({ infoMessage });
+    setInfoMessageDB(this.account, this._state.infoMessage);
+  }
+
+  setLimit() {
+    if (this._state.version.unlimited) {
+      this.todayMaxLikes = 5000;
+      this.maxFavorites = 100;
+      chrome.runtime.sendMessage({ unlimited: 'P' });
+    } else {
+      this.todayMaxLikes = 100;
+      this.maxFavorites = 3;
+      chrome.runtime.sendMessage({ unlimited: 'f' });
+    }
+  }
+
   setInitState() {
     if (this.data) {
-      const { settings, counter , favorites } = this.data;
+      const { settings, counter , favorites, forceUnlimited, dateLikeToday, LMOn } = this.data;
+      this.LMOn = !!LMOn;
+      const today = moment().format("DD-MM-YY");
       if (settings) this._state = setInitSettingsData(this._state, settings);
       if (counter) this._state = setInitCounterData(this._state, counter);
       if (favorites) this._state = setInitFavoritesData(this._state, favorites);
+      if (forceUnlimited) this.unlimited = true;
+      this.setLimit();
+      if (dateLikeToday !== today) {
+        this.dateLikeToday = today;
+        this.resetTodayCounter();
+      }
+      setVersionDB(this.account, this._state.version);
+    } else {
+      const { settings, counter , favorites, version } = this._state;
+      const initDataDB = {
+        counter,
+        favorites,
+        settings,
+        version,
+        dateLikeToday: moment().format("DD-MM-YY"),
+        forceUnlimited: false,
+        createAccount: moment().format("DD-MM-YY_HH:mm:ss")
+      };
+      setInitDataDB(this.account, initDataDB);
     }
-    localStorage.getItem('LMOn') === 'true' ? this.switchOnLM() : this.switchOffLM();
+    this._state.LMOn ? this.switchOnLM() : this.switchOffLM();
     this._onLikeNow(0);
   }
 
   setInitPopupState() {
-    const { settings, favorites, error403, LMOn } = this._state;
-    chrome.runtime.sendMessage({ settingsState: settings, favoritesState: favorites, error403, LMOn });
+    const { settings, favorites, LMOn, infoMessage } = this._state;
+    chrome.runtime.sendMessage({ settingsState: settings, favoritesState: favorites, LMOn, infoMessage });
   }
 
   setPopupSettings(popupData) {
-    const { elementsNodes, currentHaveyElementNum, settings, error403 } = this._state;
+    const { elementsNodes, currentHaveyElementNum, settings } = this._state;
     const { currentPhotoColor, viewElementColor, viewElementSwitch, viewElementPosition, pageZoom } = popupData;
     this.settings = popupData;
     chrome.runtime.sendMessage({ settingsState: this._state.settings });
@@ -138,7 +220,24 @@ export default class Model {
 
   resetPopupSettings() {
     this.settings = initialState.settings
+    const {
+      elementsNodes,
+      currentHaveyElementNum,
+      settings: {
+        currentPhotoColor,
+        viewElementColor,
+        viewElementSwitch,
+        viewElementPosition,
+        pageZoom
+      }
+    } = this._state;
     chrome.runtime.sendMessage({ settingsState: this._state.settings });
+    this._onStyleViewElement(viewElementColor, viewElementPosition);
+    this._onViewElementSwitch(viewElementSwitch);
+    chrome.runtime.sendMessage({ pageZoom });
+    const currentNodes = elementsNodes[currentHaveyElementNum];
+    currentNodes && handleCurrentElement(currentNodes.element, currentPhotoColor);
+    this.infoMessage = 'Reset settings';
   }
 
   setCurrentHaveyElNum(num) {
@@ -146,28 +245,35 @@ export default class Model {
     const prevElementNodes = elementsNodes[currentHaveyElementNum];
     LMOn && prevElementNodes && handlePrevElement(prevElementNodes.element);
     this._state = setCurrentHaveyElementNum(this._state, num);
-    this.setCurrentEl(elementsNodes[num].element);
+    this.currentElement = elementsNodes[num].element;
     LMOn && handleCurrentElement(elementsNodes[num].element, settings.currentPhotoColor);
-  }
-
-  setCurrentEl(element) {
-    this._state = setCurrentElement(this._state, element);
   }
 
   saveFavorites() {
     try {
       let { type, name, link } = this._state.currentTag;
-      if (type === 'photos') {
-        const userName = elementData(this._state.currentElement).userName.replace(/[.,#$\/\[\]]/g, '_');
-        const date = moment(elementData(this._state.currentElement).dateCreate).format("DD-MM-YYYY_HH:mm");
-        name = `${userName}_${date}`;
-        if (!link) link = elementData(this._state.currentElement).postLink;
+      if (Object.keys(this._state.favorites[type]).length < this._state.version.maxFavorites) {
+        if (type === 'photos') {
+          const userName = elementData(this._state.currentElement).userName.replace(/[.,#$\/\[\]]/g, '_');
+          const date = moment(elementData(this._state.currentElement).dateCreate).format("DD-MM-YYYY_HH:mm");
+          name = `${userName}_${date}`;
+          if (!link) link = elementData(this._state.currentElement).postLink;
+        }
+        if (type === 'locations') {
+          const locationElement = document.querySelector('._qkuz0');
+          const spriteLocation = locationElement.querySelector('div');
+          if (spriteLocation) {
+            name = locationElement.innerHTML.match(/^<div.*<\/div>(.*)$/)[1];
+          } else {
+            name = locationElement.innerHTML;
+          }
+        }
+        this._state = setFavorites(this._state, type, { [name]: link});
+        this.favorites = this._state.favorites;
+        chrome.runtime.sendMessage({ favoritesState: this._state.favorites });
+        this.infoMessage = `\"${decodeURI(name)}\" added to ${type}`;
       }
-      this._state = setFavorites(this._state, type, { [name]: link});
-      this.favorites = this._state.favorites;
-      chrome.runtime.sendMessage({ favoritesState: this._state.favorites });
     } catch (e) {
-      console.log('save favorites fail');
     }
   }
 
@@ -200,9 +306,42 @@ export default class Model {
     this.counter = { likeTotal: this._state.counter.likeTotal, likeToday: 0 };
   }
 
-  resetCounterToday() {
-    this._state = setItemCounter(this._state, 'likeToday', 0);
+  likeCurrentElement() {
+    const currentElement = this._state.currentElement;
+    const heartFull = elementData(currentElement).heartFull;
+    if (!heartFull) {
+      this.likeElement(currentElement);
+      this.fullHearts = 0;
+    } else {
+      this.fullHearts = this.state.fullHearts + 1;
+    }
   }
+
+  likeElement(currentElement) {
+    try {
+      const image = elementData(currentElement).dblclickImageElement;
+      const heart = elementData(currentElement).heartElement;
+      image ? image.dispatchEvent(new MouseEvent('dblclick', {'bubbles': true})) : heart.click();
+    } catch (e) {
+    }
+  }
+
+  unlikeElement(currentElement) {
+    try {
+      elementData(currentElement).heartElement.click();
+    } catch (e) {
+    }
+  }
+
+  clickCurrentElement() {
+    try {
+      const currentElement = this._state.currentElement;
+      const heartFull = elementData(currentElement).heartFull;
+      heartFull ? this.unlikeElement(currentElement) : this.likeElement(currentElement);
+    } catch (e) {
+    }
+  }
+
 
   onClick(element) {
     if (this._state.LMOn) {
@@ -213,7 +352,8 @@ export default class Model {
   onDblclick(element) {
     if (this._state.LMOn) {
       const postLink = elementData(element).postLink;
-      !this._state.elementsData.hasOwnProperty(postLink) && this.likeHeart(element);
+      // !this._state.elementsData.hasOwnProperty(postLink) && this.likeHeart(element);
+      this.likeHeart(element);
     }
   }
 
@@ -252,24 +392,41 @@ export default class Model {
 
   saveImage() {
     const src = elementData(this._state.currentElement).imageSrc;
-    const link = document.createElement("a");
-    link.setAttribute("href", src);
-    link.setAttribute("download", "new-image-name.jpg");
-    link.click();
+    if (src) {
+      const link = document.createElement("a");
+      link.setAttribute("href", src);
+      link.setAttribute("download", "new-image-name.jpg");
+      link.click();
+      this.infoMessage = 'Photo downloaded';
+    } else {
+      this.infoMessage = 'No photo';
+    }
   }
 
-  error403On() {
+  errorOn() {
     const { viewElementPosition } = this._state.settings;
     this._onStyleViewElement('rgba(255,0,0,0.75)', viewElementPosition);
-    this.error403 = true;
-    chrome.runtime.sendMessage({ error403: true });
+    this.error = true;
   }
 
-  error403Off() {
+  errorOff() {
     const { viewElementColor, viewElementPosition } = this._state.settings;
     this._onStyleViewElement(viewElementColor, viewElementPosition);
-    this.error403 = false;
-    chrome.runtime.sendMessage({ error403: false });
+    this.error = false;
+    this.infoMessage = ``;
+  }
+
+  error400On() {
+    const { viewElementPosition } = this._state.settings;
+    this._onStyleViewElement('rgba(255,0,0,0.9)', viewElementPosition);
+    this.error400 = true;
+  }
+
+  error400Off() {
+    const { viewElementColor, viewElementPosition } = this._state.settings;
+    this._onStyleViewElement(viewElementColor, viewElementPosition);
+    this.error400 = false;
+    this.infoMessage = ``;
   }
 
   switchOnLM() {
@@ -292,7 +449,6 @@ export default class Model {
     this._onStyleViewElement(viewElementColor, viewElementPosition);
     chrome.runtime.sendMessage({ pageZoom });
     chrome.runtime.sendMessage({ LMOn: true });
-    localStorage.setItem('LMOn', true);
   }
 
   switchOffLM() {
@@ -302,7 +458,53 @@ export default class Model {
     chrome.runtime.sendMessage({ pageZoom: 1 });
     const prevElementNodes = elementsNodes[currentHaveyElementNum];
     prevElementNodes && handlePrevElement(prevElementNodes.element);
+    chrome.runtime.sendMessage({ pageZoom: 1 });
     chrome.runtime.sendMessage({ LMOn: false });
-    localStorage.setItem('LMOn', false);
+  }
+
+  clickInstagramLink(link) {
+    const a = document.createElement("a");
+    a.setAttribute("href", `https://www.instagram.com${link}`);
+    a.click();
+  };
+
+  startNextItemFavorites() {
+    try {
+      const { favoriteLinks, currentFavoriteLinkNum } = storage;
+      if (currentFavoriteLinkNum < favoriteLinks.length - 1) {
+        storage.currentFavoriteLinkNum = currentFavoriteLinkNum + 1;
+        const currentLink = favoriteLinks[currentFavoriteLinkNum + 1];
+        storage.currentLink = currentLink;
+        this.infoMessage = `Waiting for next tag: ${this.state.settings.tagDelay} min`;
+        this.timerStartNextItemFavoritesID = setTimeout(() => {
+          this.clickInstagramLink(currentLink);
+        }, this._state.settings.tagDelay * 60 * 1000);
+      } else {
+        storage.resetStorage();
+        this.infoMessage = 'Stop: Favorites link';
+      }
+    } catch (e) {
+      this.infoMessage = 'Error: Favorites link';
+      clearTimeout(this.timerStartNextItemFavoritesID);
+      storage.resetStorage();
+    }
+  }
+
+  startFavorites(links) {
+    storage.state = {
+      playFavorites: true,
+      favoriteLinks: links,
+      currentFavoriteLinkNum: 0,
+      currentLink: links[0]
+    }
+    this.infoMessage = 'Start: Favorites link';
+    this.clickInstagramLink(links[0]);
+  }
+
+  openFullVersion() {
+    const a = document.createElement("a");
+    a.setAttribute("href", 'https://chrome.google.com/webstore/detail/like-machine/ncgclagijkcjkfbicolgamphegapbmba');
+    a.setAttribute("target", '_blank');
+    a.click();
   }
 }

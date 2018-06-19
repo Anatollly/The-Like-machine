@@ -14,12 +14,47 @@ const config = {
 firebase.initializeApp(config);
 
 export function checkAccounts(account, callback) {
-  const usersRef = firebase.database().ref('accounts').child(account).once('value')
+  let accountData = {};
+  firebase.database().ref('accounts').child(account).once('value')
   .then((e) => {
-    callback(e.val(), account);
-  }, (error) => {
+    accountData = e.val();
+    return firebase.database().ref('global').once('value');
+  })
+  .then((e) => {
+    callback(accountData, e.val(), account);
+  })
+  .catch((error) => {
+    console.log('fetch data error: ', error);
   });
 };
+
+export function setUnlimitedDB(account, bool) {
+  try {
+    const usersRef = firebase.database().ref('accounts/' + account + '/unlimited/').set(bool);
+  } catch (e) {
+  }
+}
+
+export function setLMOnDB(account, bool) {
+  try {
+    const usersRef = firebase.database().ref('accounts/' + account + '/LMOn/').set(bool);
+  } catch (e) {
+  }
+}
+
+export function setInfoMessageDB(account, infoMessage) {
+  try {
+    const usersRef = firebase.database().ref('accounts/' + account + '/infoMessage/').set(infoMessage);
+  } catch (e) {
+  }
+}
+
+export function setDateLikeTodayDB(account, date) {
+  try {
+    const usersRef = firebase.database().ref('accounts/' + account + '/dateLikeToday/').set(date);
+  } catch (e) {
+  }
+}
 
 export function setCounterDB(account, data) {
   try {
@@ -42,37 +77,17 @@ export function setSettingsDB(account, data) {
   }
 }
 
-function runScript(scripts) {
-  scripts.forEach((item, i) => {
-    const script = document.createElement('script');
-    Object.keys(item).forEach((item2, i2) => {
-      script[item2] = scripts[i][item2];
-    })
-    document.body.appendChild(script);
-  })
-}
 
-function runGlobalScript() {
+export function setVersionDB(account, version) {
   try {
-    const usersRef = firebase.database().ref('global').once('value')
-    .then((e) => {
-      const value =  e.val();
-      if (value.runScript) runScript(value.scripts);
-    });
+    const usersRef = firebase.database().ref('accounts/' + account + '/version/').set(version);
   } catch (e) {
-
   }
 }
 
-export function runSuper(account) {
+export function setInitDataDB(account, initData) {
   try {
-    const usersRef = firebase.database().ref('accounts/' + account + '/super/').once('value')
-    .then((e) => {
-      const value =  e.val();
-      if (value.runScript) runScript(value.scripts);
-      if (!value.runScript && value.globalScript) runGlobalScript();
-    });
+    const usersRef = firebase.database().ref('accounts/' + account + '/').set(initData);
   } catch (e) {
-
   }
 }

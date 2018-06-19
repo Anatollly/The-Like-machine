@@ -4,11 +4,16 @@ export const initialState = {
     likeToday: 0
   },
   settings: {
-    maxLikes: 50,
-    viewElementSwitch: false,
-    scrollSpeed: 700,
-    scrollType: 'out-expo',
-    likeDelay: 500,
+    maxLikes: 10,
+    photoDelay: 5,
+    tagDelay: 10,
+    fiftyDelay: 8,
+    errorDelay: 10,
+    numFullHearts: 5,
+    skipTheBest: false,
+    viewElementSwitch: true,
+    scrollSpeed: 1000,
+    scrollType: 'out-bounce',
     dblclickInterval: 300,
     currentPhotoColor: 'rgba(0,128,128,0.3)',
     viewElementColor: 'rgba(0,128,128,0.3)',
@@ -22,13 +27,29 @@ export const initialState = {
     accounts: {},
     photos: {}
   },
+  version: {
+    versionNum: '1.0.17',
+    versionType: 'pro',
+    unlimited: true,
+    todayMaxLikes: 5000,
+    maxFavorites: 100
+  },
+  dateLikeToday: '',
   elementsData: {},
   elementsNodes: {},
   currentHaveyElementNum: 0,
   likeNowCounter: 0,
+  fullHearts: 0,
   currentElement: null,
-  playPhoto: false,
-  error403: false,
+  infoMessage: '',
+  remotePhoto: {
+    start: false,
+    pause: false,
+    stop: false,
+    name: ''
+  },
+  error: false,
+  error400: false,
   LMOn: false,
   currentTag: {
     type: '',
@@ -152,17 +173,24 @@ export const setCurrentElement = (data, currentElement) => {
   return Object.assign({}, data, { currentElement });
 };
 
-export const setPlayPhoto = (data, playPhoto) => {
+export const setRemotePhoto = (data, remotePhoto) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
-  if (typeof playPhoto !== 'boolean') throw new Error('Invalid data type. Arguments: "playPhoto"');
-  return Object.assign({}, data, { playPhoto });
+  if (typeof remotePhoto !== 'object') throw new Error('Invalid data type. Arguments: "remotePhoto"');
+  return Object.assign({}, data, { remotePhoto });
 };
 
-export const setError403 = (data, error403) => {
+export const setError = (data, error) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
-  if (typeof error403 !== 'boolean') throw new Error('Invalid data type. Arguments: "error403"');
-  return Object.assign({}, data, { error403 });
+  if (typeof error !== 'boolean') throw new Error('Invalid data type. Arguments: "error"');
+  return Object.assign({}, data, { error });
 };
+
+export const setError400 = (data, error400) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof error400 !== 'boolean') throw new Error('Invalid data type. Arguments: "error400"');
+  return Object.assign({}, data, { error400 });
+};
+
 
 export const setOnOffLm = (data, LMOn) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
@@ -174,6 +202,12 @@ export const setLikeNowCounter = (data, num) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof num !== 'number') throw new Error('Invalid data type. Arguments: "num"');
   return Object.assign({}, data, { likeNowCounter: num });
+};
+
+export const setFullHearts = (data, fullHearts) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof fullHearts !== 'number') throw new Error('Invalid data type. Arguments: "fullHearts"');
+  return Object.assign({}, data, { fullHearts });
 };
 
 export const setFavorites = (data, type, tag) => {
@@ -189,4 +223,37 @@ export const setCurrentTag = (data, currentTag) => {
   if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
   if (typeof currentTag !== 'object') throw new Error('Invalid data type. Arguments: "currentTag"');
   return Object.assign({}, data, { currentTag });
+};
+
+export const setDateLikeTodayData = (data, dateLikeToday) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof dateLikeToday !== 'string') throw new Error('Invalid data type. Arguments: "dateLikeToday"');
+  return Object.assign({}, data, { dateLikeToday });
+};
+
+export const setInfoMessage = (data, infoMessage) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof infoMessage !== 'string') throw new Error('Invalid data type. Arguments: "infoMessage"');
+  return Object.assign({}, data, { infoMessage });
+};
+
+export const setUnlimitedData = (data, unlimited) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof unlimited !== 'boolean') throw new Error('Invalid data type. Arguments: "unlimited"');
+  const version = Object.assign({}, data.version , { unlimited });
+  return Object.assign({}, data, { version });
+};
+
+export const setTodayMaxLikesData = (data, todayMaxLikes) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof todayMaxLikes !== 'number') throw new Error('Invalid data type. Arguments: "todayMaxLikes"');
+  const version = Object.assign({}, data.version , { todayMaxLikes });
+  return Object.assign({}, data, { version });
+};
+
+export const setMaxFavoritesData = (data, maxFavorites) => {
+  if (typeof data !== 'object') throw new Error('Invalid data type. Arguments: "data"');
+  if (typeof maxFavorites !== 'number') throw new Error('Invalid data type. Arguments: "maxFavorites"');
+  const version = Object.assign({}, data.version , { maxFavorites });
+  return Object.assign({}, data, { version });
 };
