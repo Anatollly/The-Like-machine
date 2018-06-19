@@ -9,7 +9,7 @@ export default class ExploreController {
   }
 
   get haveyElement() {
-    this._haveyElement = document.querySelectorAll('._havey');
+    this._haveyElement = document.querySelectorAll('article > div');
     return this._haveyElement;
   }
 

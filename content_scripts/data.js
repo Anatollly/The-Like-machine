@@ -11,9 +11,9 @@ export const initialState = {
     errorDelay: 10,
     numFullHearts: 5,
     skipTheBest: false,
-    viewElementSwitch: false,
+    viewElementSwitch: true,
     scrollSpeed: 1000,
-    scrollType: 'out-expo',
+    scrollType: 'out-bounce',
     dblclickInterval: 300,
     currentPhotoColor: 'rgba(0,128,128,0.3)',
     viewElementColor: 'rgba(0,128,128,0.3)',
@@ -28,7 +28,7 @@ export const initialState = {
     photos: {}
   },
   version: {
-    versionNum: '1.0.13',
+    versionNum: '1.0.17',
     versionType: 'pro',
     unlimited: true,
     todayMaxLikes: 5000,

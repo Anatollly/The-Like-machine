@@ -4,7 +4,7 @@
     "name": "Like machine",
     "description": "The extension that will make you popular in the Instagram",
     "default_locale": "en",
-    "version": "1.0.13",
+    "version": "1.0.17",
     "short_name": "The extension for Instagram",
     "icons": {
             "16": "images/LM16.png",

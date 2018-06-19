@@ -115,6 +115,7 @@ const handViewElementSwitch = (toogle, model) => {
 const getProfile = () => {
   try {
     const navProfile = document.querySelector('.coreSpriteDesktopNavProfile');
+    // const navProfile = document.querySelector('.kQqyt');
     const navProfileHref = navProfile && navProfile.href;
     const linkProfile = document.querySelector('#link_profile a');
     const linkProfileHref = linkProfile && linkProfile.href;
@@ -180,7 +181,7 @@ window.onload = () => {
       window.scrollTo(0, 0);
       checkAccounts(account, loadAccountData);
     }
-    if (n > 10) clearInterval(timerOnloadID);
+    if (n > 20) clearInterval(timerOnloadID);
   },300);
   window.onbeforeunload = () => {
     if (!storage.currentLink) storage.playFavorites = false;

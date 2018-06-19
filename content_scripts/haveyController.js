@@ -22,7 +22,7 @@ export default class HaveyController {
   }
 
   get haveyElement() {
-    return document.querySelector('._havey');
+    return document.querySelector('._d4oao');
   }
 
   get currentNodes() {
